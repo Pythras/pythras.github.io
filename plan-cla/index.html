@@ -290,6 +290,8 @@ kbd { color: #ffffff38; }
 .groupe .nom { color: #ffffff73; font-size: 12px; }
 .haut-guide { background: #0e0e0e; }
 .haut-guide button { background: #ffffff14; color: var(--noir); border: 0; font-weight: 400; }
+#relancer-visite { margin-left: auto; margin-right: 6px; background: none; color: #ffffff8c; }
+#relancer-visite:hover { color: #fff; }
 #onglets button { background: none; color: #ffffff73; padding: 6px 10px; border-radius: 7px; }
 #onglets button.on { background: #ffffff21; color: #fff; }
 .guide h3 { color: var(--noir); font: 400 18px/1.25 var(--serif); }
@@ -331,6 +333,84 @@ kbd { color: #ffffff38; }
 .serre .multi .pad .ch { font-size: 9px; letter-spacing: -.03em; } .serre .multi .pad { padding: 1px; }
 @media (min-width: 640px) { .pad .ch { font-size: 15px; } .lC .pad .ch { font-size: 20px; } .pad .no { font-size: 10px; } .cell.lC.multi .pad .ch { font-size: 16px; } }
 
+/* ========== Visite de première ouverture ========== */
+.visite { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 12px;
+  background: #000000c7; opacity: 0; visibility: hidden; transition: opacity .18s, visibility 0s linear .18s; }
+.visite.ouvert { opacity: 1; visibility: visible; transition: opacity .18s; }
+.vis-carte { width: min(400px, 100%); max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); display: flex; flex-direction: column;
+  background: #0e0e0e; border: 1px solid var(--ligne); border-radius: 16px; color: var(--noir); font-family: var(--sans);
+  overflow: hidden; touch-action: pan-y; }
+.vis-carte:focus { outline: none; }
+.vis-haut { display: flex; justify-content: space-between; padding: 6px 6px 0; flex: none; }
+.vis-lien { border: 0; background: none; color: var(--discret); font: 400 12.5px var(--sans); padding: 9px 10px; border-radius: 7px; cursor: pointer; }
+.vis-lien:hover { color: #fff; }
+.vis-defile { flex: 1; min-height: 0; overflow-y: auto; padding: 2px 18px 0; }
+.vis-illu { min-height: 120px; display: grid; place-items: center; padding: 14px 10px; margin-bottom: 16px;
+  background: var(--papier); border: 1px solid var(--ligne); border-radius: 12px; overflow: hidden; }
+.vis-corps h2 { font: 400 20px/1.2 var(--serif); margin: 0 0 10px; color: var(--noir); }
+.vis-texte { color: #ffffffb8; font-size: 14px; line-height: 1.5; }
+.vis-texte p { margin: 0 0 9px; }
+.vis-texte ul { list-style: none; margin: 0; padding: 0; }
+.vis-texte li { margin: 0 0 9px; }
+.vis-texte b { font-weight: 400; color: var(--noir); }
+.vis-texte .vis-note { color: var(--discret); font-size: 12.5px; }
+.vis-points { display: flex; justify-content: center; padding: 8px 0 0; flex: none; }
+.vis-points button { width: 24px; height: 24px; border: 0; background: none; padding: 0; cursor: pointer; display: grid; place-items: center; border-radius: 6px; }
+.vis-points button::before { content: ''; width: 6px; height: 6px; border-radius: 3px; background: #ffffff38; transition: width .15s, background .15s; }
+.vis-points button.on::before { width: 16px; background: #fff; }
+.vis-bas { display: flex; gap: 8px; padding: 8px 14px 14px; flex: none; }
+.vis-bouton { flex: 1; border: 0; border-radius: 9px; padding: 12px; font: 400 14px/1 var(--sans); cursor: pointer; background: #ffffff14; color: var(--noir); }
+.vis-bouton.principal { background: #fff; color: #000; }
+.vis-bouton:disabled { opacity: .3; cursor: default; }
+.visite button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .visite, .visite.ouvert, .vis-points button::before { transition: none; } }
+
+/* Illustrations : copies inertes des éléments du pad */
+.vis-plan { display: grid; gap: 3px; width: 100%; max-width: 290px; }
+.vis-rom { font: 400 11px/1.3 var(--serif); text-align: center; color: var(--noir); white-space: nowrap; }
+.vis-cel { height: 11px; border-radius: 3px; background: color-mix(in srgb, var(--c) 55%, var(--surface)); }
+.vis-cel.lC { height: 16px; }
+.vis-cel.vide { background: none; }
+.vis-case { position: relative; display: inline-flex; align-items: baseline; justify-content: center; min-width: 62px; padding: 15px 8px; border-radius: 8px;
+  font: 400 17px/1 var(--serif); color: var(--c); background: color-mix(in srgb, var(--c) 9%, var(--surface)); }
+.vis-case.lC { background: #1c1c1c; color: #fff; }
+.vis-case small { font-size: .62em; opacity: .7; }
+.vis-case.tenu { background: var(--c); color: #000; }
+.vis-case.dernier { background: #fff; color: #000; }
+.vis-case.cible::before { content: ''; position: absolute; inset: 1px; border: 1.5px dashed #ffffffd9; border-radius: 7px; }
+.vis-case kbd { display: block; position: absolute; bottom: 3px; right: 5px; font: 400 9px var(--sans); color: #ffffff52; }
+.vis-piv { position: absolute; top: 3px; right: 5px; font-style: normal; font-size: 8px; color: #fff; }
+.vis-etats { display: flex; gap: 10px; justify-content: center; align-items: center; }
+.vis-etats > div { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+.vis-etats em { font-style: normal; font-size: 11px; color: var(--discret); }
+.vis-pile { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.vis-suite { display: flex; align-items: center; gap: 8px; }
+.vis-fleche { color: var(--discret); }
+.vis-familles { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.vis-familles span { background: #ffffff0d; color: var(--c); border-radius: 999px; padding: 4px 9px; font-size: 11.5px; white-space: nowrap; }
+.vis-cote { display: flex; align-items: center; gap: 14px; }
+.vis-vues { display: flex; flex-direction: column; gap: 4px; }
+.vis-vues span { color: #ffffff4d; display: grid; place-items: center; padding: 6px; border-radius: 7px; }
+.vis-vues span.on { color: #fff; background: #ffffff21; }
+.vis-rose { display: flex; flex-direction: column; align-items: center; }
+.vis-c-t { fill: #fff; font: 400 10px var(--serif); text-anchor: middle; dominant-baseline: central; }
+.vis-c-p { fill: var(--doux); font: 400 6.5px var(--sans); text-anchor: middle; dominant-baseline: central; }
+.vis-legende { display: flex; justify-content: space-between; width: 150px; font-size: 10.5px; color: var(--discret); margin-top: 2px; }
+.vis-legende span:first-child { color: var(--cE); } .vis-legende span:last-child { color: var(--cB); }
+.vis-barres { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.vis-barre { display: flex; align-items: center; gap: 1px; }
+.vis-barre.bas { justify-content: center; border-top: 1px solid var(--ligne); padding-top: 10px; }
+.vis-nom { font: 400 17px/1 var(--serif); color: var(--noir); margin-right: auto; white-space: nowrap; }
+.vis-nom i { font-style: normal; font-size: 7px; color: var(--discret); margin-left: 3px; vertical-align: middle; }
+.vis-btn { font: 400 11.5px/1 var(--sans); color: #ffffffbf; padding: 6px 5px; border-radius: 6px; white-space: nowrap; }
+.vis-btn.on { background: #ffffff21; color: #fff; }
+.vis-ic { color: #ffffff4d; display: grid; padding: 3px; }
+.vis-ic svg { width: 13px; height: 13px; }
+.vis-rond { color: #ffffff99; font-size: 12px; width: 20px; text-align: center; }
+.vis-rond.grand { width: 52px; height: 52px; border-radius: 50%; background: #ffffff14; color: #fff; font-size: 20px; display: grid; place-items: center; }
+.vis-sep { width: 1.5px; align-self: stretch; background: var(--ligne); margin: 3px; }
+@media (max-width: 350px) { .vis-nom { font-size: 15px; } .vis-btn { font-size: 10.5px; padding: 5px 3px; } .vis-rond { width: 16px; } .vis-defile { padding: 2px 14px 0; } }
+
 </style>
 </head>
 <body>
@@ -359,13 +439,24 @@ kbd { color: #ffffff38; }
 
 <div class="voile" id="voile"></div>
 <section class="feuille" id="f-ecriture"><div class="poignee"></div><h2>Écriture</h2><div id="ecriture"></div></section>
+<div class="visite" id="visite">
+  <div class="vis-carte" id="vis-carte" role="dialog" aria-modal="true" aria-labelledby="vis-titre" tabindex="-1">
+    <div class="vis-haut"><button class="vis-lien" id="vis-guide">Guide complet</button><button class="vis-lien" id="vis-passer">Passer</button></div>
+    <div class="vis-defile" id="vis-defile">
+      <div class="vis-illu" id="vis-illu" aria-hidden="true"></div>
+      <div class="vis-corps" aria-live="polite"><h2 id="vis-titre"></h2><div class="vis-texte" id="vis-texte"></div></div>
+    </div>
+    <div class="vis-points" id="vis-points" role="group" aria-label="Volets"></div>
+    <div class="vis-bas"><button class="vis-bouton" id="vis-prec">Précédent</button><button class="vis-bouton principal" id="vis-suiv">Suivant</button></div>
+  </div>
+</div>
 <section class="feuille" id="f-cle"><div class="poignee"></div><h2>Tonalité</h2><svg id="cercle-cle" viewBox="0 0 240 240"></svg></section>
 <section class="feuille" id="f-reglages"><div class="poignee"></div><h2>Réglages</h2><div id="reglages"></div><p class="version" id="version"></p></section>
 <section class="feuille large" id="f-guide"><div class="poignee"></div><div class="haut-guide"><div class="vues" id="onglets"></div><button id="fermer-guide">Fermer</button></div><div class="guide" id="guide"><section class="onglet" data-titre="Guide"><p class="g-titre">Guide de l'élève : Plan harmonique · classique</p>
 <h3>À quoi sert l'appli</h3>
 <p>Ce pad te fait entendre tous les accords disponibles dans une tonalité, y compris les accords altérés. Tu touches une case, l'accord sonne. Tu enchaînes les cases, tu entends une progression.</p>
 <p>Les accords sont rangés comme dans le plan harmonique vu au cours : une colonne par degré de la gamme, une ligne par famille d'accords. L'appli ne corrige rien et n'enregistre pas ce que tu joues. C'est un banc d'essai pour écouter ce que tu étudies.</p>
-<p>Deux vues, <strong>Plan</strong> et <strong>Cercle</strong>, se choisissent avec les deux icônes en haut à droite : la grille et le cercle. Le bouton <strong>?</strong>, à côté de l'engrenage, ouvre ce guide.</p>
+<p>Deux vues, <strong>Plan</strong> et <strong>Cercle</strong>, se choisissent avec les deux icônes en haut à droite : la grille et le cercle. Le bouton <strong>?</strong>, à côté de l'engrenage, ouvre ce guide. La visite rapide qui s'affiche à la première ouverture se relance avec le bouton « Visite », en haut du guide.</p>
 <h3>Premiers pas</h3>
 <p>Touche une case pour entendre l'accord. Garde le doigt dessus pour le faire tenir. Le premier toucher allume le son : si tu n'entends rien sur iPhone, vérifie que le téléphone n'est pas en mode silencieux.</p>
 <p>En bas de l'écran, tu lis toujours ce que tu viens de jouer :</p>
@@ -1424,7 +1515,7 @@ const Pad = (() => {
 </script>
 <script>
 'use strict';
-const VERSION = '0.8';
+const VERSION = '0.9.1';
 // Fixés à l'assemblage : chaque appli sœur a son style (build.js)
 const STYLE = 'classique', NOM = 'Plan harmonique · classique';
 const { P, etat } = Pad;
@@ -1924,6 +2015,189 @@ Pad.brancher($('vue-plan'), '.pad');
 Pad.brancher(zone, '.cellule');
 etat.style = STYLE;
 Pad.recalculer();
+const ICONES_VISITE = {"plan":"<svg viewBox=\"0 0 16 16\" width=\"15\" height=\"15\" aria-hidden=\"true\"><g fill=\"currentColor\"><rect x=\"1\" y=\"2\" width=\"4\" height=\"3\" rx=\".6\"/><rect x=\"6\" y=\"2\" width=\"4\" height=\"3\" rx=\".6\"/><rect x=\"11\" y=\"2\" width=\"4\" height=\"3\" rx=\".6\"/><rect x=\"1\" y=\"6.5\" width=\"4\" height=\"3\" rx=\".6\"/><rect x=\"6\" y=\"6.5\" width=\"4\" height=\"3\" rx=\".6\"/><rect x=\"11\" y=\"6.5\" width=\"4\" height=\"3\" rx=\".6\"/><rect x=\"1\" y=\"11\" width=\"4\" height=\"3\" rx=\".6\"/><rect x=\"6\" y=\"11\" width=\"4\" height=\"3\" rx=\".6\"/><rect x=\"11\" y=\"11\" width=\"4\" height=\"3\" rx=\".6\"/></g></svg>","cercle":"<svg viewBox=\"0 0 16 16\" width=\"15\" height=\"15\" aria-hidden=\"true\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\"><circle cx=\"8\" cy=\"8\" r=\"6.3\"/><circle cx=\"8\" cy=\"8\" r=\"3\"/></g><path d=\"M8 0.6v3\" stroke=\"currentColor\" stroke-width=\"1.4\"/></svg>"};
+/* ---------- Visite de première ouverture (appli classique) ---------- */
+// Six volets courts, affichés une seule fois. Monter VISITE.version quand leur contenu change : la visite revient une fois.
+// Clé à part dans le localStorage : rien n'est écrit sous CLE_STOCKAGE (orthographe des tonalités).
+const VISITE = { cle: 'plan-harmonique.guide', version: 1 };
+const visiteDejaVue = () => { try { return Number(localStorage.getItem(VISITE.cle)) >= VISITE.version; } catch (_) { return false; } };
+const retenirVisite = () => { try { localStorage.setItem(VISITE.cle, String(VISITE.version)); } catch (_) {} };
+
+// Petites illustrations, dessinées avec les couleurs et la police du pad
+const caseVis = (L, ch, sec, etat = '', extra = '') =>
+  `<span class="vis-case l${L}${etat ? ' ' + etat : ''}">${ch}${sec ? `<small>${sec}</small>` : ''}${extra}</span>`;
+
+// Le plan de la tonalité en cours, en miniature : une ligne par famille, une case colorée là où il y a un accord
+function miniPlan() {
+  const g = Pad.grille;
+  return `<div class="vis-plan" style="grid-template-columns: repeat(${g.colonnes.length}, 1fr)">`
+    + g.colonnes.map(c => `<span class="vis-rom">${c.entete.rom}</span>`).join('')
+    + g.lignes.map(L => g.colonnes.map(c => `<span class="vis-cel l${L}${c.cases[L].length ? '' : ' vide'}"></span>`).join('')).join('')
+    + '</div>';
+}
+
+function etatsDUneCase() {
+  return `<div class="vis-etats">`
+    + [['', 'au repos'], ['tenu', 'il sonne'], ['dernier', 'dernier joué']]
+      .map(([e, t]) => `<div>${caseVis('B', 'V7', '/ii', e)}<em>${t}</em></div>`).join('')
+    + `</div>`;
+}
+
+function famillesEtSuite() {
+  const noms = { A: 'Prédominantes chromatiques', B: 'Dominantes secondaires', C: 'Degrés diatoniques', D: 'Sensibles secondaires', E: 'Emprunts' };
+  return `<div class="vis-pile"><div class="vis-suite">${caseVis('B', 'V7', '/ii', 'dernier')}<span class="vis-fleche">→</span>${caseVis('C', 'ii', '', 'cible')}</div>`
+    + `<div class="vis-familles">${Object.entries(noms).map(([L, n]) => `<span class="l${L}">${n}</span>`).join('')}</div></div>`;
+}
+
+function miniCercle() {
+  const pt = (r, a) => [r * Math.cos(a * Math.PI / 180), r * Math.sin(a * Math.PI / 180)].map(v => v.toFixed(2));
+  const secteur = (r0, r1, a0, a1) => { const [x0, y0] = pt(r1, a0), [x1, y1] = pt(r1, a1), [x2, y2] = pt(r0, a1), [x3, y3] = pt(r0, a0);
+    return `M${x0} ${y0}A${r1} ${r1} 0 0 1 ${x1} ${y1}L${x2} ${y2}A${r0} ${r0} 0 0 0 ${x3} ${y3}Z`; };
+  const fond = L => L === 'C' ? '#1c1c1c' : `color-mix(in srgb, var(--c${L}) 22%, #151515)`;
+  let s = '';
+  // anneau des degrés diatoniques autour de la tonique (en haut), puis la couronne : dominantes à droite, emprunts et sixtes à gauche
+  [['IV', -120], ['I', -90], ['V', -60]].forEach(([t, a]) => { const [x, y] = pt(34, a);
+    s += `<path d="${secteur(25, 43, a - 14.5, a + 14.5)}" fill="${fond('C')}" stroke="#000" stroke-width="1.5"/><text x="${x}" y="${y}" class="vis-c-t">${t}</text>`; });
+  [['B', -30], ['B', 0], ['D', 30], ['B', 60]].forEach(([L, a]) => s += `<path d="${secteur(46, 60, a - 14.5, a + 14.5)}" fill="${fond(L)}" stroke="#000" stroke-width="1.5"/>`);
+  [['E', -150], ['E', 180], ['A', 150], ['E', 120]].forEach(([L, a]) => s += `<path d="${secteur(46, 60, a - 14.5, a + 14.5)}" fill="${fond(L)}" stroke="#000" stroke-width="1.5"/>`);
+  s += `<circle r="65" fill="none" stroke="#ffffff17" stroke-width="5"/><path d="M-4 -75 L4 -75 L0 -70 Z" fill="#fff"/>`;
+  s += `<circle r="21" fill="#000" stroke="#ffffff17"/><text y="-3" class="vis-c-t">Fa</text><text y="8" class="vis-c-p">majeur</text>`;
+  return `<div class="vis-cote"><div class="vis-vues"><span>${ICONES_VISITE.plan}</span><span class="on">${ICONES_VISITE.cercle}</span></div>`
+    + `<div class="vis-rose"><svg viewBox="-80 -80 160 160" width="138" height="138" aria-hidden="true">${s}</svg>`
+    + `<div class="vis-legende"><span>emprunts</span><span>dominantes</span></div></div></div>`;
+}
+
+function barres() {
+  return `<div class="vis-barres"><div class="vis-barre"><span class="vis-nom">Fa majeur<i>▼</i></span><span class="vis-btn">Écriture ›</span>`
+    + `<span class="vis-ic">${ICONES_VISITE.plan}</span><span class="vis-ic">${ICONES_VISITE.cercle}</span><span class="vis-rond">?</span><span class="vis-rond">⚙︎</span></div>`
+    + `<div class="vis-barre bas"><span class="vis-btn">♭</span><span class="vis-btn">♯</span><span class="vis-btn">⇄ ré mineur</span><span class="vis-sep"></span>`
+    + `<span class="vis-btn on">Tenue</span><span class="vis-btn">Pédale</span><span class="vis-btn">Arpège</span></div></div>`;
+}
+
+function astuces() {
+  return `<div class="vis-etats">${caseVis('C', 'I', '', '', `<kbd>${etiquette('KeyA')}</kbd>`)}`
+    + `${caseVis('C', 'ii', '', '', '<i class="vis-piv">◆</i>')}<span class="vis-rond grand">?</span></div>`;
+}
+
+const VOLETS = [
+  { titre: 'Le plan harmonique, à jouer', illu: miniPlan, texte: () =>
+    `<p>Tous les accords d'une tonalité, rangés comme le plan harmonique du cours : une colonne par degré, une ligne par famille d'accords.</p>`
+    + `<p>Tu touches une case, l'accord sonne à quatre voix. Tu enchaînes les cases, tu entends une progression. Rien n'est noté ni corrigé : c'est un banc d'essai pour écouter ce que tu étudies.</p>` },
+  { titre: 'Lire la grille, jouer un accord', illu: etatsDUneCase, texte: () =>
+    `<p>En haut de chaque colonne, le degré visé et sa fondamentale. Touche une case pour entendre l'accord, garde le doigt dessus pour le tenir.</p>`
+    + `<p>En bas de l'écran, tu lis son chiffrage, son renversement et ses notes. Le petit clavier montre comment chaque voix a bougé.</p>`
+    + `<p class="vis-note">Pas de son sur iPhone ? Vérifie que le téléphone n'est pas en mode silencieux.</p>` },
+  { titre: 'Les familles et les enchaînements', illu: famillesEtSuite, texte: () =>
+    `<p>Chaque ligne est une famille, reconnaissable à sa couleur. Dans une colonne, le violet, l'orange et le rose mènent vers l'accord diatonique, en blanc. Le vert est sa version empruntée au mode parallèle.</p>`
+    + `<p>Quand un accord mène quelque part, la case où il va s'entoure de pointillés : joue-la pour entendre la résolution.</p>`
+    + `<p>Touche le nom d'une famille pour lire ce qu'elle fait.</p>` },
+  { titre: 'La vue Cercle', illu: miniCercle, texte: () =>
+    `<p>L'icône du cercle, en haut, range les mêmes accords sur le cercle des quintes, d'après leur fondamentale. La tonique est en haut, entourée des accords diatoniques.</p>`
+    + `<p>À droite, côté dièses, les dominantes et les sensibles secondaires. À gauche, côté bémols, les emprunts, la sixte napolitaine et les sixtes augmentées.</p>`
+    + `<p>Fais tourner l'anneau extérieur pour changer de tonique. Touche le centre pour passer au relatif.</p>` },
+  { titre: 'Tonalité et réglages', illu: barres, texte: () => `<ul>`
+    + `<li><b>Le nom de la tonalité</b> : touche-le pour en choisir une autre sur le cercle des quintes.</li>`
+    + `<li><b>♭ ♯</b>, en bas : une quinte plus loin. <b>⇄</b> : le relatif.</li>`
+    + `<li><b>Tenue, Pédale, Arpège</b> : laisser sonner, tenir la tonique ou la dominante à la basse, égrener les notes.</li>`
+    + `<li><b>Écriture</b> : triades ou septièmes, neuvièmes, position, renversement.</li>`
+    + `<li><b>⚙</b> : le son, l'orthographe des tonalités (Fa♯ ou Sol♭…), les accords pivots.</li></ul>` },
+  { titre: 'Quelques astuces', illu: astuces, texte: () => `<ul>`
+    + `<li><b>Sur ordinateur</b>, chaque case affiche sa touche : la rangée du milieu joue les degrés diatoniques. Garde la touche enfoncée pour tenir l'accord.</li>`
+    + `<li><b>Rejouer un accord</b>, dans Écriture : rejoue la même case et l'accord change de position. La 2e fois, c'est la position d'octave, pour un repos.</li>`
+    + `<li><b>Accords pivots</b>, dans ⚙ : après un changement de tonalité, un ◆ marque les accords communs aux deux tonalités.</li>`
+    + `<li><b>Le bouton ?</b> ouvre le guide complet, avec les règles d'écriture des voix. Son bouton « Visite » relance ce tour.</li></ul>` },
+];
+
+let volet = 0, avantVisite = null;
+const visiteOuverte = () => $('visite').classList.contains('ouvert');
+function rendreVolet() {
+  const v = VOLETS[volet], n = VOLETS.length;
+  $('vis-illu').innerHTML = v.illu();
+  $('vis-titre').textContent = v.titre;
+  $('vis-texte').innerHTML = v.texte();
+  $('vis-points').innerHTML = VOLETS.map((_, i) =>
+    `<button class="${i === volet ? 'on' : ''}" data-i="${i}" aria-label="Volet ${i + 1} sur ${n}"${i === volet ? ' aria-current="step"' : ''}></button>`).join('');
+  $('vis-prec').disabled = volet === 0;
+  $('vis-suiv').textContent = volet === n - 1 ? "C'est parti" : 'Suivant';
+  $('vis-defile').scrollTop = 0;
+}
+function allerA(i, focusPoint = false) {
+  const j = Math.max(0, Math.min(VOLETS.length - 1, i));
+  if (j === volet) return;
+  volet = j; rendreVolet();
+  if (focusPoint) $('vis-points').querySelector('.on').focus();
+  else if (!$('visite').contains(document.activeElement) || document.activeElement.disabled) $('vis-suiv').focus();
+}
+// Hauteur constante d'un volet à l'autre (celle du plus long), pour que Précédent et Suivant ne bougent pas sous le doigt
+function ajusterCarte() {
+  const carte = $('vis-carte'), garde = volet;
+  carte.style.minHeight = '';
+  let h = 0;
+  for (volet = 0; volet < VOLETS.length; volet++) { rendreVolet(); h = Math.max(h, carte.offsetHeight); }
+  volet = garde; rendreVolet();
+  carte.style.minHeight = h + 'px';
+}
+function ouvrirVisite(i = 0) {
+  // au retour, le focus revient au bouton qui a ouvert la visite ; s'il était dans une feuille qui se ferme, au bouton ?
+  avantVisite = document.activeElement && document.activeElement.closest('.feuille') ? $('ouvrir-guide') : document.activeElement;
+  fermer();
+  volet = i;
+  $('visite').classList.add('ouvert');
+  ajusterCarte();
+  $('vis-carte').focus();
+}
+addEventListener('resize', () => { if (visiteOuverte()) ajusterCarte(); });
+// La police embarquée arrive juste après le premier rendu : remesurer quand elle est prête
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (visiteOuverte()) ajusterCarte(); });
+function fermerVisite() {
+  retenirVisite();
+  $('visite').classList.remove('ouvert');
+  if (avantVisite && avantVisite !== document.body && document.contains(avantVisite)) avantVisite.focus();
+  avantVisite = null;
+}
+$('vis-suiv').onclick = () => volet === VOLETS.length - 1 ? fermerVisite() : allerA(volet + 1);
+$('vis-prec').onclick = () => allerA(volet - 1);
+$('vis-passer').onclick = fermerVisite;
+$('vis-guide').onclick = () => {
+  fermerVisite();
+  const premier = $('onglets').querySelector('button'); if (premier) premier.click();
+  ouvrir('f-guide');
+};
+$('vis-points').onclick = e => { const b = e.target.closest('button'); if (b) allerA(+b.dataset.i, true); };
+// Glisser vers la gauche ou la droite pour changer de volet (téléphone)
+{
+  let depart = null;
+  $('vis-carte').addEventListener('pointerdown', e => { depart = e.target.closest('button') ? null : [e.clientX, e.clientY]; });
+  $('vis-carte').addEventListener('pointerup', e => {
+    if (!depart) return;
+    const dx = e.clientX - depart[0], dy = e.clientY - depart[1]; depart = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > 1.5 * Math.abs(dy)) allerA(volet + (dx < 0 ? 1 : -1));
+  });
+  $('vis-carte').addEventListener('pointercancel', () => depart = null);
+}
+// Clavier : la visite garde la main (aucun accord ne se joue derrière elle)
+addEventListener('keydown', e => {
+  if (!visiteOuverte()) return;
+  e.stopPropagation();
+  if (e.key === 'Escape') { e.preventDefault(); fermerVisite(); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); allerA(volet + 1); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); allerA(volet - 1); }
+  else if (e.key === 'Tab') {
+    const f = [...$('visite').querySelectorAll('button:not(:disabled)')], i = f.indexOf(document.activeElement);
+    if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && (i === -1 || i === f.length - 1)) { e.preventDefault(); f[0].focus(); }
+  }
+}, true);
+
+// Le bouton ? garde le guide complet ; la visite se relance depuis l'en-tête du guide
+{
+  const b = document.createElement('button');
+  b.id = 'relancer-visite'; b.textContent = 'Visite'; b.title = 'Relancer la visite rapide';
+  $('fermer-guide').before(b);
+  b.onclick = () => ouvrirVisite(0);
+}
+if (!visiteDejaVue()) ouvrirVisite(0);
+
 </script>
 </body>
 </html>
