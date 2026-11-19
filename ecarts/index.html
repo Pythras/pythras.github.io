@@ -1,0 +1,2015 @@
+<!DOCTYPE html>
+<!-- ÉCARTS · entraînement aux intervalles · v0.7 · 2026-11-18 -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="version" content="0.7">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#e9dfcc">
+<script>try{var s=(JSON.parse(localStorage.getItem('ecarts.v1')||'{}').settings)||{},t=s.theme||'auto';
+document.documentElement.dataset.theme=(t==='dark'||(t==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches))?'dark':'light';}catch(e){}</script>
+<title>Écarts · intervalles</title>
+<style>
+[hidden]{display:none !important}
+:root{
+  --bg:#e9dfcc; --paper:#f7f0e3; --paper2:#efe5d2; --btn:#fbf6ec;
+  --ink:#231c17; --ink2:#5b4b3e; --ink3:#8d7c6b;
+  --line:#d3c3aa; --line2:#e2d6c2;
+  --accent:#9c4a26; --ochre:#b9862f;
+  --ok:#55703a; --ko:#b03a26; --okbg:#e4e5cc; --kobg:#f3dccf;
+  --okt:#2f4220; --kot:#6b2416; --onok:#fff; --onacc:#fff; --segon:var(--paper);
+  --bgimg1:rgba(255,250,240,.75); --bgimg2:rgba(156,74,38,.10); --hi:rgba(255,255,255,.7);
+  --overlay:rgba(247,240,227,.96); --scrim:rgba(35,28,23,.38); --scrim2:rgba(35,28,23,.45);
+  --kw:#fffaf1; --kwmid:#ead2bd; --kbk:#231c17; --kbkmid:#7a4a30;
+  --knob:#fff; --knobon:#fff;
+  color-scheme:light;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+}
+/* Mode sombre : même papier et même encre, à la lumière d'une lampe */
+:root[data-theme="dark"]{
+  --bg:#15110e; --paper:#211a15; --paper2:#2a221b; --btn:#2a221c;
+  --ink:#efe5d4; --ink2:#c9bba7; --ink3:#978774;
+  --line:#4a3e33; --line2:#352c25;
+  --accent:#e0855a; --ochre:#d8a64c;
+  --ok:#8cb067; --ko:#e8705a; --okbg:#27301d; --kobg:#3b211a;
+  --okt:#d3e6bb; --kot:#f6c5b8; --onok:#14100c; --onacc:#1b120d; --segon:#3a2f27;
+  --bgimg1:rgba(255,215,170,.05); --bgimg2:rgba(224,133,90,.08); --hi:rgba(255,255,255,.04);
+  --overlay:rgba(33,26,21,.97); --scrim:rgba(0,0,0,.55); --scrim2:rgba(0,0,0,.6);
+  --kw:#d9cebd; --kwmid:#b07a5c; --kbk:#0f0c0a; --kbkmid:#6e3f28;
+  --knob:#cfc2ae; --knobon:#211a15;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:var(--sans); color:var(--ink); background:var(--bg);
+  background-image:radial-gradient(120% 60% at 15% -10%, var(--bgimg1), transparent 60%),
+                   radial-gradient(80% 50% at 110% 110%, var(--bgimg2), transparent 60%);
+  background-attachment:fixed; min-height:100vh; -webkit-tap-highlight-color:transparent;
+  -webkit-text-size-adjust:100%;
+}
+button{font:inherit; color:inherit; cursor:pointer; touch-action:manipulation}
+.app{max-width:600px; margin:0 auto; padding:max(12px, env(safe-area-inset-top)) 14px calc(28px + env(safe-area-inset-bottom))}
+
+header{display:flex; align-items:center; gap:10px; padding:4px 2px 12px}
+.logo svg{width:38px; height:30px; display:block}
+.brand h1{font:600 21px/1 var(--serif); letter-spacing:.22em; margin:0}
+.brand p{margin:4px 0 0; font:italic 13px/1.2 var(--serif); color:var(--ink3); text-wrap:balance}
+.brand{min-width:0}
+.iconbtn{ width:42px; height:42px; border-radius:12px; border:1px solid var(--line); background:var(--btn); display:grid; place-items:center; color:var(--ink2)}
+.ic{width:18px; height:18px; display:inline-block; vertical-align:-3px}
+
+nav.tabs{display:grid; grid-template-columns:repeat(4,1fr); gap:3px; padding:3px; background:var(--paper2); border:1px solid var(--line); border-radius:13px; margin-bottom:12px}
+nav.tabs button{border:0; background:transparent; padding:9px 2px; border-radius:10px; font-size:14px; font-weight:500; color:var(--ink2)}
+nav.tabs button.on{background:var(--ink); color:var(--paper)}
+
+.view[hidden]{display:none}
+.toolbar{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px}
+.seg{display:inline-flex; background:var(--paper2); border:1px solid var(--line); border-radius:11px; padding:2px; gap:2px; flex-wrap:wrap}
+.seg button{border:0; background:transparent; padding:7px 11px; border-radius:9px; font-size:13.5px; font-weight:500; color:var(--ink2)}
+.seg button.on{background:var(--segon); color:var(--ink); box-shadow:0 1px 2px rgba(60,40,20,.2)}
+.pill{border:1px solid var(--line); background:var(--btn); border-radius:11px; padding:8px 12px; font-size:13.5px; font-weight:600; color:var(--accent); white-space:nowrap}
+.pill.on{background:var(--accent); color:var(--onacc); border-color:var(--accent)}
+
+.card{position:relative; background:var(--paper); border:1px solid var(--line); border-radius:18px; overflow:hidden;
+  box-shadow:0 1px 0 var(--hi) inset, 0 10px 24px -16px rgba(70,45,20,.55)}
+.timer{position:absolute; left:0; top:0; height:3px; width:0; background:var(--accent); transition:width .1s linear}
+.stage{min-height:150px; display:flex; flex-direction:column; justify-content:center; padding:10px 8px 0}
+svg.staff{width:100%; height:auto; display:block}
+.sl{stroke:var(--ink); stroke-width:.85; opacity:.78}
+.led{stroke:var(--ink); stroke-width:1.1}
+.gl{stroke:var(--accent); stroke-width:1; opacity:.35}
+.clef path{fill:none; stroke:var(--ink); stroke-linecap:round; stroke-linejoin:round}
+.clef circle{fill:var(--ink)}
+.head{fill:var(--ink); transition:fill .2s}
+.head.ok{fill:var(--ok)} .head.ko{fill:var(--ko)}
+.acc{color:var(--ink)} .acc.ok{color:var(--ok)} .acc.ko{color:var(--ko)}
+.ghost{fill:var(--accent); opacity:.42}
+.lab{font:600 9px var(--sans); fill:var(--accent)} .lab.ko{fill:var(--ko)}
+.mark{font:italic 600 24px var(--serif); fill:var(--accent)}
+.accg{height:.95em; vertical-align:-.07em; margin-left:.03em}
+
+.names{display:flex; align-items:center; justify-content:center; gap:16px; font:600 42px/1.1 var(--serif); padding:22px 0 18px; letter-spacing:.01em}
+.names.small{font-size:24px; padding:10px 0 0; gap:10px; color:var(--ink2)}
+.names .arr{color:var(--accent)} .names .arr .ic{width:.62em; height:.62em; vertical-align:.05em}
+.names.harm{flex-direction:column; gap:0}
+.names.harm .bar{width:46px; height:1px; background:var(--line); margin:6px 0}
+.names .qm{color:var(--accent); font-style:italic}
+.ear{display:flex; flex-direction:column; align-items:center; gap:12px; padding:22px 0 16px; color:var(--ink3); font:italic 15px var(--serif)}
+.bigplay{width:76px; height:76px; border-radius:50%; border:1px solid var(--line); background:var(--btn); color:var(--accent); display:grid; place-items:center; box-shadow:0 6px 16px -10px rgba(70,45,20,.6)}
+.bigplay .ic{width:28px; height:28px; margin-left:4px}
+
+.cprompt{display:flex; flex-wrap:wrap; align-items:baseline; justify-content:center; gap:4px 10px; padding:4px 6px 0; text-align:center}
+.cprompt .ivn{font:600 23px var(--serif)}
+.cprompt .dir{font:italic 16px var(--serif); color:var(--ink2)}
+.cprompt .dir .ic{color:var(--accent); width:14px; height:14px; vertical-align:-1px}
+
+.hintline{padding:2px 14px 10px; font:14px/1.4 var(--serif); color:var(--ink2); text-align:center}
+.hintline b{color:var(--accent)}
+.hintline .lad{display:inline-flex; flex-wrap:wrap; gap:4px 10px; justify-content:center}
+.hintline .lad i{font:600 10px var(--sans); color:var(--accent); font-style:normal; margin-right:2px; vertical-align:2px}
+
+.card-actions{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 10px 10px}
+.ghostbtn{border:0; background:transparent; color:var(--accent); font-weight:600; font-size:14px; padding:8px 8px; border-radius:9px}
+.ghostbtn:active{background:var(--paper2)}
+.ghostbtn.on{background:var(--paper2)}
+
+.feedback{min-height:58px; margin-top:10px; padding:9px 12px; border-radius:14px; display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:15px; line-height:1.3}
+.feedback .prompt{width:100%; text-align:center; font:italic 17px var(--serif); color:var(--ink3)}
+.feedback.ok{background:var(--okbg); color:var(--okt)}
+.feedback.ko{background:var(--kobg); color:var(--kot)}
+.feedback b{font-family:var(--serif); font-size:17px}
+.feedback .sub{font-size:13px; opacity:.85; margin-top:2px}
+.feedback .dim{opacity:.75}
+.next{flex:none; border:0; border-radius:11px; background:var(--ink); color:var(--paper); padding:10px 14px; font-weight:600; font-size:14px}
+
+.answers{display:grid; gap:7px; margin-top:10px}
+.row{display:grid; gap:6px}
+.nums{grid-template-columns:repeat(7,1fr)}
+.quals{grid-template-columns:repeat(5,1fr)}
+.accs{grid-template-columns:repeat(var(--n,3),1fr)}
+.letters{grid-template-columns:repeat(7,1fr)}
+.ab{min-height:52px; border:1px solid var(--line); background:var(--btn); border-radius:12px; color:var(--ink); padding:0 2px;
+  box-shadow:0 1px 0 rgba(70,45,20,.14); transition:background .12s, color .12s, opacity .12s}
+.ab:active{transform:translateY(1px)}
+.ab.num{font:600 19px var(--serif)} .ab.num sup{font-size:.58em; margin-left:1px}
+.ab.qual{font-size:14.5px; font-weight:500; min-height:46px}
+.ab.let{font:600 17px var(--serif)}
+.ab.ac{min-height:46px; font-size:28px; line-height:1} .ab.ac .accg{height:1em; vertical-align:middle}
+.ab.sel{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+.ab.right{background:var(--ok); color:var(--onok); border-color:var(--ok)}
+.ab.wrong{background:var(--ko); color:var(--onok); border-color:var(--ko)}
+.ab:disabled{opacity:.28}
+.scoreline{margin-top:12px; text-align:center; font-size:13px; color:var(--ink3)}
+.scoreline b{color:var(--ink2)}
+.kbdhelp{margin-top:4px; text-align:center; font-size:11.5px; color:var(--ink3); opacity:.8}
+@media (hover:none){ .kbdhelp{display:none} }
+
+.overlay{position:absolute; inset:0; background:var(--overlay); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; text-align:center; padding:16px; z-index:3}
+.overlay .big{font:600 56px/1 var(--serif); color:var(--accent)}
+.overlay .sub{font-size:14px; color:var(--ink2)}
+.overlay .rec{font:italic 15px var(--serif); color:var(--ok)}
+.overlay .btns{display:flex; gap:8px; margin-top:10px}
+.btn{border:1px solid var(--line); background:var(--btn); border-radius:11px; padding:10px 14px; font-weight:600; font-size:14px}
+.btn.dark{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+
+/* Explorer */
+.exinfo{padding:0 14px 6px}
+.exhead{display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap}
+.exname{font:600 24px var(--serif)}
+.exnotes{font:600 18px var(--serif); color:var(--ink2)}
+.exnotes .ic{color:var(--accent); width:13px; height:13px; vertical-align:0}
+.facts{display:grid; grid-template-columns:auto 1fr; gap:4px 12px; margin:8px 0 2px; font-size:14px}
+.facts dt{color:var(--ink3)} .facts dd{margin:0}
+.warn{color:var(--ko); font-size:14px; padding:20px 14px; text-align:center}
+.kb{padding:4px 14px 6px} .kb svg{width:100%; height:auto; display:block}
+.kw{fill:var(--kw); stroke:var(--ink3); stroke-width:.6} .kbk{fill:var(--kbk); stroke:var(--kbk); stroke-width:.6}
+.kw.mid{fill:var(--kwmid)} .kbk.mid{fill:var(--kbkmid)}
+.kw.hit,.kbk.hit{fill:var(--accent)}
+.panel{margin-top:12px; background:var(--paper); border:1px solid var(--line); border-radius:18px; padding:12px}
+.lbl{font:600 11px var(--sans); letter-spacing:.12em; text-transform:uppercase; color:var(--ink3); margin:4px 2px 7px}
+.lbl ~ .lbl{margin-top:14px}
+.panel .row + .row{margin-top:6px}
+
+.ivgrid{display:grid; grid-template-columns:44px repeat(7,1fr); gap:4px; align-items:center}
+.ivgrid .gh{text-align:center; font:600 14px var(--serif)} .ivgrid .gh sup{font-size:.6em}
+.ivgrid .gq{font-size:12px; color:var(--ink3)}
+.ivc{height:34px; border:1px solid var(--line); background:var(--btn); border-radius:9px; font-size:12px; color:var(--ink3); padding:0}
+.ivc.on{background:var(--accent); border-color:var(--accent); color:var(--onacc)}
+.ivgrid.single .ivc.on{background:var(--ink); border-color:var(--ink)}
+.gridnote{font-size:12px; color:var(--ink3); margin:6px 2px 0}
+
+/* Progrès */
+.pcard{background:var(--paper); border:1px solid var(--line); border-radius:18px; padding:14px; margin-bottom:12px}
+.pcard h3{font:600 18px var(--serif); margin:0 0 4px}
+.pcard p.note{margin:0 0 10px; font-size:13px; color:var(--ink3)}
+.recs{display:grid; grid-template-columns:1fr auto; gap:6px 12px; font-size:14px}
+.recs b{font:600 18px var(--serif); color:var(--accent); text-align:right}
+table.pt{width:100%; border-collapse:separate; border-spacing:3px; font-size:13px}
+table.pt th{font-weight:500; color:var(--ink3); font-size:11.5px; padding:2px}
+table.pt td{text-align:center; padding:5px 2px; border-radius:8px; line-height:1.15}
+table.pt td.iv{text-align:left; font:600 14px var(--serif); white-space:nowrap; padding-left:4px}
+table.pt td small{display:block; font-size:10.5px; color:var(--ink2); opacity:.85}
+table.pt td.na{color:var(--line)}
+.dangerbtn{width:100%; border:1px dashed var(--line); background:transparent; border-radius:12px; padding:12px; color:var(--ink3); font-size:14px}
+.dangerbtn.arm{border-color:var(--ko); color:var(--ko); border-style:solid}
+.empty{text-align:center; color:var(--ink3); font:italic 16px var(--serif); padding:30px 10px}
+
+/* Réglages */
+.sheet{position:fixed; inset:0; z-index:20}
+.sheet[hidden]{display:none}
+.sheet-bg{position:absolute; inset:0; background:var(--scrim)}
+.sheet-panel{position:absolute; left:0; right:0; bottom:0; max-height:90vh; overflow:auto; background:var(--paper); border-radius:20px 20px 0 0;
+  padding:14px 16px calc(24px + env(safe-area-inset-bottom)); box-shadow:0 -10px 30px -10px rgba(35,28,23,.5); -webkit-overflow-scrolling:touch}
+@media (min-width:760px){ .sheet-panel{left:auto; top:0; width:440px; max-height:none; border-radius:0} }
+.sheet-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px}
+.sheet-top h2{font:600 20px var(--serif); margin:0}
+.set{padding:12px 0; border-top:1px solid var(--line2)}
+.set:first-child{border-top:0}
+.set-l{font-weight:600; font-size:14px; margin-bottom:8px}
+.tglrow{display:flex; align-items:center; justify-content:space-between; gap:12px}
+.tglrow .set-l{margin:0; font-weight:500}
+.help{font-size:12.5px; color:var(--ink3); margin:7px 2px 0; line-height:1.35}
+.tg{flex:none; width:46px; height:28px; border-radius:14px; border:0; background:var(--line); position:relative; padding:0}
+.tg i{position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:var(--knob); transition:left .15s; box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.tg.on{background:var(--ink)} .tg.on i{left:21px; background:var(--knobon)}
+.presets{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px}
+.presets button{border:1px solid var(--line); background:var(--btn); border-radius:9px; padding:6px 10px; font-size:13px}
+.set .seg{display:flex} .set .seg button{flex:1}
+
+.seg[data-type=multi] button.on{background:var(--ink); color:var(--paper)}
+.gridsub{font:600 11px var(--sans); letter-spacing:.12em; text-transform:uppercase; color:var(--ink3); margin:12px 2px 6px}
+#flashN.on{background:var(--paper2)}
+
+.helpbtn{margin-left:auto; width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:transparent; color:var(--ink3); font:600 16px/1 var(--serif); padding:0}
+.sheet-top .iconbtn{margin-left:auto}
+
+/* Guide */
+.guide{position:fixed; inset:0; z-index:30; display:grid; place-items:center; padding:16px}
+.guide-bg{position:absolute; inset:0; background:var(--scrim2)}
+.guide-card{position:relative; width:100%; max-width:420px; max-height:min(88vh, 660px); display:flex; flex-direction:column;
+  background:var(--paper); border:1px solid var(--line); border-radius:20px; box-shadow:0 24px 50px -20px rgba(35,28,23,.65); overflow:hidden}
+.guide-body{padding:22px 22px 6px; overflow:auto; flex:1; -webkit-overflow-scrolling:touch}
+.guide-body .kick{font:600 11px var(--sans); letter-spacing:.14em; text-transform:uppercase; color:var(--accent)}
+.guide-body h2{font:600 24px/1.15 var(--serif); margin:6px 34px 12px 0}
+.guide-body p{margin:0 0 10px; font-size:15px; line-height:1.45; color:var(--ink2)}
+.guide-body b{color:var(--ink); font-weight:600}
+.guide-body ul{margin:0 0 10px; padding:0; list-style:none}
+.guide-body li{margin:0 0 9px; font-size:15px; line-height:1.4; color:var(--ink2); padding-left:15px; position:relative}
+.guide-body li::before{content:''; position:absolute; left:0; top:.55em; width:6px; height:6px; border-radius:50%; background:var(--accent); opacity:.8}
+.guide-body .ic{width:15px; height:15px; vertical-align:-2px; color:var(--accent)}
+.gmock{display:flex; gap:6px; flex-wrap:wrap; margin:4px 0 12px; pointer-events:none}
+.gmock .ab{height:42px; min-height:0; min-width:42px; padding:0 9px; display:inline-flex; align-items:center; justify-content:center}
+.gmock .ab.ac{font-size:22px}
+.gstaff{background:var(--paper2); border:1px solid var(--line2); border-radius:12px; padding:4px 2px 0; margin:2px 0 12px}
+.guide-foot{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 16px 14px; border-top:1px solid var(--line2)}
+.guide-foot .btn{min-width:100px}
+.dots{display:flex; gap:6px; align-items:center}
+.dots button{width:8px; height:8px; border-radius:4px; border:0; padding:0; background:var(--line); transition:width .15s}
+.dots button.on{background:var(--accent); width:18px}
+.guide-x{position:absolute; top:12px; right:12px; width:34px; height:34px; border-radius:50%; border:0; background:transparent; color:var(--ink3); display:grid; place-items:center; z-index:1}
+.ver{margin:18px 0 0; text-align:center; font:italic 12px var(--serif); color:var(--ink3); opacity:.8}
+
+.ghostbtn:disabled{opacity:.3}
+.gmock-grid{display:block; margin:6px 0 10px}
+.gmock-grid .ivgrid{grid-template-columns:44px repeat(4,1fr)}
+ul.tips{margin:0 0 4px; padding:0; list-style:none}
+ul.tips li{margin:0 0 9px; font-size:14.5px; line-height:1.42; color:var(--ink2); padding-left:15px; position:relative}
+ul.tips li::before{content:''; position:absolute; left:0; top:.55em; width:6px; height:6px; border-radius:50%; background:var(--accent); opacity:.8}
+ul.tips b{color:var(--ink); font-weight:600}
+.pcard .gstaff{margin:6px 0 12px}
+.rep{padding:10px 0; border-top:1px solid var(--line2)}
+.rep:first-of-type{border-top:0}
+.rep-h{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:3px}
+.rep-h b{font:600 16px var(--serif)}
+.rep-h .ghostbtn{padding:6px 8px}
+.rep-h .ghostbtn .ic{width:13px; height:13px}
+.rep-l{font-size:14px; line-height:1.4; color:var(--ink2); margin:2px 0}
+.rep-d{display:inline-block; width:18px; color:var(--accent)} .rep-d .ic{width:12px; height:12px}
+.rep-tip{font:italic 14px var(--serif); color:var(--ink3)}
+.facts dd .ic{width:12px; height:12px; color:var(--accent); vertical-align:-1px}
+
+/* Mode d'emploi */
+.man-panel{padding-top:0}
+.man-top{position:sticky; top:0; z-index:2; background:var(--paper); padding:14px 0 10px; border-bottom:1px solid var(--line2); margin:0 -16px; padding-left:16px; padding-right:16px}
+.man-top .sheet-top{margin-bottom:10px}
+.man-toc{display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch}
+.man-toc::-webkit-scrollbar{display:none}
+.man-toc button{flex:none; border:1px solid var(--line); background:var(--btn); border-radius:20px; padding:6px 12px; font-size:13px; color:var(--ink2)}
+.man-sec{padding:16px 0 4px; border-top:1px solid var(--line2)}
+.man-sec:first-child{border-top:0}
+.man-sec h3{font:600 20px var(--serif); margin:0 0 8px}
+.man-sec p{font-size:14.5px; line-height:1.45; color:var(--ink2); margin:0 0 10px}
+.man-sec p.note{font-size:13px; color:var(--ink3)}
+.man-sec .ic{width:14px; height:14px; color:var(--accent); vertical-align:-2px}
+.man-dl{margin:0 0 10px}
+.man-dl dt{font-weight:600; font-size:14.5px; margin-top:10px}
+.man-dl dd{margin:2px 0 0; font-size:14.5px; line-height:1.42; color:var(--ink2)}
+.man-ver{text-align:center; font-style:italic; font-family:var(--serif)}
+#manBody{padding-bottom:45vh}
+
+.iorow{display:flex; gap:8px; margin-top:4px}
+.iorow .btn{flex:1}
+.iomsg{font-size:14px; line-height:1.4; color:var(--ink2); margin-top:10px}
+.iomsg:empty{display:none}
+.iomsg.ok{color:var(--ok)} .iomsg.ko{color:var(--ko)}
+.iomsg .iorow{margin-top:10px}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo" id="logo"></div>
+    <div class="brand"><h1>ÉCARTS</h1><p>les intervalles · à l’œil, par cœur, à l’oreille</p></div>
+    <button class="helpbtn" id="openHelp" aria-label="Mode d’emploi">?</button>
+    <button class="iconbtn" id="openSet" aria-label="Réglages"></button>
+  </header>
+  <nav class="tabs" id="tabs">
+    <button data-t="nommer">Nommer</button><button data-t="construire">Construire</button><button data-t="explorer">Explorer</button><button data-t="progres">Progrès</button>
+  </nav>
+
+  <section class="view" id="v-nommer" hidden>
+    <div class="toolbar">
+      <div class="seg" id="stimN"><button data-v="portee">Portée</button><button data-v="noms">Noms</button><button data-v="oreille">Oreille</button></div>
+      <button class="pill" id="sprintN">Sprint 60 s</button>
+    </div>
+    <div class="card" id="cardN">
+      <div class="timer"></div>
+      <div class="stage" id="stageN"></div>
+      <div class="hintline" id="hintTextN"></div>
+      <div class="card-actions"><button class="ghostbtn" id="playN"></button><button class="ghostbtn" id="flashN">Flash</button><button class="ghostbtn" id="hintN">Indice</button></div>
+    </div>
+    <div class="feedback" id="fbN"></div>
+    <div class="answers">
+      <div class="row nums" id="numsN"></div>
+      <div class="row nums" id="nums2N" hidden></div>
+      <div class="row quals" id="qualsN"></div>
+    </div>
+    <div class="scoreline" id="scoreN"></div>
+    <div class="kbdhelp">Clavier : 2 à 9 · d m M j a · espace = écouter · entrée = suivant · h = indice</div>
+  </section>
+
+  <section class="view" id="v-construire" hidden>
+    <div class="toolbar">
+      <div class="seg" id="stimC"><button data-v="portee">Portée</button><button data-v="noms">Noms</button></div>
+      <button class="pill" id="sprintC">Sprint 60 s</button>
+    </div>
+    <div class="card" id="cardC">
+      <div class="timer"></div>
+      <div class="stage" id="stageC"></div>
+      <div class="hintline" id="hintTextC"></div>
+      <div class="card-actions"><button class="ghostbtn" id="playC"></button><button class="ghostbtn" id="hintC">Indice</button></div>
+    </div>
+    <div class="feedback" id="fbC"></div>
+    <div class="answers">
+      <div class="row accs" id="accsC"></div>
+      <div class="row letters" id="letsC"></div>
+    </div>
+    <div class="scoreline" id="scoreC"></div>
+  </section>
+
+  <section class="view" id="v-explorer" hidden>
+    <div class="toolbar"><div class="seg" id="viewE"><button data-v="fiche">Fiches</button><button data-v="tips">Astuces</button></div></div>
+    <div id="ficheE">
+    <div class="card">
+      <div class="stage" id="stageE"></div>
+      <div class="exinfo" id="infoE"></div>
+      <div class="kb" id="kbE"></div>
+      <div class="card-actions">
+        <span><button class="ghostbtn" id="playE"></button><button class="ghostbtn" id="playEh"></button></span>
+        <button class="ghostbtn" id="countE">Compter</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="lbl">Note de départ</div>
+      <div class="row accs" id="accE" style="--n:3"></div>
+      <div class="row letters" id="letE"></div>
+      <div class="lbl">Intervalle <span style="text-transform:none;letter-spacing:0;font-weight:400">· chiffre = demi-tons</span></div>
+      <div class="seg" id="cmpE" style="margin-bottom:8px"><button data-v="0">Simples</button><button data-v="1">Redoublés</button></div>
+      <div id="gridE"></div>
+      <div class="lbl">Sens et clé</div>
+      <div class="toolbar" style="flex-wrap:wrap">
+        <div class="seg" id="dirE"><button data-v="asc">Ascendant</button><button data-v="desc">Descendant</button><button data-v="harm">Harmonique</button></div>
+        <div class="seg" id="clefE"></div>
+      </div>
+    </div>
+    </div>
+    <div id="tipsE" hidden></div>
+  </section>
+
+  <section class="view" id="v-progres" hidden>
+    <div class="pcard"><h3>Records de sprint</h3><div id="recP"></div></div>
+    <div class="pcard"><h3>Par clé</h3><p class="note">Lecture sur portée uniquement. Les clés les moins maîtrisées reviennent plus souvent.</p><div id="clefTabP"></div></div>
+    <div class="pcard"><h3>Par intervalle</h3><p class="note">Réussite, temps moyen des bonnes réponses et nombre d’essais. Les intervalles faibles reviennent plus souvent.</p><div class="seg" id="clefP" style="margin-bottom:10px"></div><div id="tabP"></div></div>
+    <div class="pcard"><h3>Sauvegarde</h3>
+      <p class="note">Exporte ta progression dans un fichier pour la garder, changer d’appareil ou l’envoyer à ton prof. Importer remplace la progression actuelle.</p>
+      <div class="iorow"><button class="btn" id="exportP">Exporter</button><button class="btn" id="importP">Importer</button></div>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+      <div id="ioMsg"></div>
+    </div>
+    <button class="dangerbtn" id="resetP">Effacer la progression</button>
+    <p class="note" style="text-align:center;font-size:12px;color:var(--ink3);margin-top:10px">Tout est enregistré sur cet appareil, dans ce navigateur.</p>
+  </section>
+</div>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-bg"></div>
+  <div class="sheet-panel" role="dialog" aria-label="Réglages">
+    <div class="sheet-top"><h2>Réglages</h2><button class="iconbtn" id="closeSet" aria-label="Fermer"></button></div>
+    <div id="setBody"></div>
+    <p class="ver">ÉCARTS · v0.7</p>
+  </div>
+</div>
+<div class="sheet" id="manual" hidden>
+  <div class="sheet-bg"></div>
+  <div class="sheet-panel man-panel" role="dialog" aria-label="Mode d’emploi">
+    <div class="man-top"><div class="sheet-top"><h2>Mode d’emploi</h2><button class="iconbtn" id="closeMan" aria-label="Fermer"></button></div><nav class="man-toc" id="manToc"></nav></div>
+    <div id="manBody"></div>
+  </div>
+</div>
+<div class="guide" id="guide" hidden>
+  <div class="guide-bg"></div>
+  <div class="guide-card" role="dialog" aria-modal="true" aria-label="Guide">
+    <button class="guide-x" id="guideClose" aria-label="Fermer le guide"></button>
+    <div class="guide-body" id="guideBody"></div>
+    <div class="guide-foot"><button class="btn" id="guidePrev">Passer</button><div class="dots" id="guideDots"></div><button class="btn dark" id="guideNext">Suivant</button></div>
+  </div>
+</div>
+<script>
+'use strict';
+const APP_VERSION = '0.7';
+// ---------- Théorie (hauteurs orthographiées) ----------
+const PC = [0,2,4,5,7,9,11];
+const SOLF = ['Do','Ré','Mi','Fa','Sol','La','Si'];
+const ABC = ['C','D','E','F','G','A','B'];
+const NUM_NAME = ['','unisson','seconde','tierce','quarte','quinte','sixte','septième','octave',
+  'neuvième','dixième','onzième','douzième','treizième','quatorzième','quinzième'];
+const SUPX = ['','er','de','ce','te','te','te','e','ve'];
+const NUM_SUP = NUM_NAME.map((_, n) => n ? `<span class="nb">${n}</span><sup>${n > 8 ? 'e' : SUPX[n]}</sup>` : '');
+const NUM_TXT = NUM_NAME.map((_, n) => n ? n + (n > 8 ? 'e' : SUPX[n]) : '');
+const Q_NAME = {d:'diminuée', m:'mineure', M:'majeure', J:'juste', a:'augmentée'};
+const Q_SHORT = {d:'dim.', m:'min.', M:'maj.', J:'juste', a:'aug.'};
+const QUALS = ['d','m','M','J','a'];
+const simpleN = n => n > 8 ? n - 7 : n;
+const PERFECT = n => [1,4,5,8].includes(simpleN(n));
+const BASE = [0,0,2,4,5,7,9,11,12];
+const baseSemis = n => BASE[simpleN(n)] + (n > 8 ? 12 : 0);
+const validQ = (n,q) => PERFECT(n) ? 'dJa'.includes(q) : 'dmMa'.includes(q);
+function ivSemis(n,q){ return baseSemis(n) + (PERFECT(n) ? {d:-1,J:0,a:1}[q] : {d:-2,m:-1,M:0,a:1}[q]); }
+function qualityOf(n,s){
+  const diff = s - baseSemis(n);
+  const t = PERFECT(n) ? {'-2':'dd','-1':'d','0':'J','1':'a','2':'aa'} : {'-3':'dd','-2':'d','-1':'m','0':'M','1':'a','2':'aa'};
+  return t[diff] || '?';
+}
+const SIMPLE_IDS = ['2m','2M','2a','3d','3m','3M','4d','4J','4a','5d','5J','5a','6m','6M','6a','7d','7m','7M','8J'];
+const COMPOUND_IDS = ['9m','9M','9a','10d','10m','10M','11d','11J','11a','12d','12J','12a','13m','13M','13a','14d','14m','14M','15J'];
+const IVS = [...SIMPLE_IDS, ...COMPOUND_IDS].map(id => { const m = id.match(/^(\d+)(\w+)$/); return {id, n:+m[1], q:m[2]}; });
+const IVMAP = Object.fromEntries(IVS.map(i => [i.id, i]));
+const numName = n => n === 15 ? 'double octave' : NUM_NAME[n];
+function ivName(n,q){
+  if(n===1) return q==='J' ? 'unisson' : 'unisson ' + ({a:'augmenté', d:'diminué'}[q]);
+  if(n===15 && q==='J') return 'double octave';
+  return NUM_NAME[n] + ' ' + Q_NAME[q];
+}
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const dia = nt => nt.o*7 + nt.l;
+const semi = nt => nt.o*12 + PC[nt.l] + nt.a;          // dérivé à la volée (son, qualité), jamais stocké
+const fromDia = (d, a=0) => ({l:((d%7)+7)%7, o:Math.floor(d/7), a});
+function transpose(nt, iv, dir){
+  const d = dia(nt) + (iv.n-1)*dir;
+  const t = fromDia(d);
+  t.a = semi(nt) + dir*ivSemis(iv.n, iv.q) - (t.o*12 + PC[t.l]);
+  return t;
+}
+function intervalBetween(a, b){
+  let lo=a, hi=b;
+  if(dia(b) < dia(a)){ lo=b; hi=a; }
+  const n = dia(hi) - dia(lo) + 1, s = semi(hi) - semi(lo);
+  return {n, s, q: qualityOf(n, s)};
+}
+// Renversement de l'intervalle simple
+function inversion(n,q){ return {n: 9-simpleN(n), q: {d:'a', a:'d', m:'M', M:'m', J:'J'}[q]}; }
+
+// ---------- Armures ----------
+const SHARP_ORDER = [3,0,4,1,5,2,6], FLAT_ORDER = [6,2,5,1,4,0,3];
+function keyAcc(k){
+  const a = [0,0,0,0,0,0,0];
+  if(k > 0) SHARP_ORDER.slice(0, k).forEach(l => a[l] = 1);
+  if(k < 0) FLAT_ORDER.slice(0, -k).forEach(l => a[l] = -1);
+  return a;
+}
+
+// ---------- Dessin de la portée ----------
+const ST = {top:50, W:280};
+const f = v => (Math.round(v*100)/100).toString();
+// Note sur la 1re ligne (du bas) pour chaque clé
+const CLEF_BOTTOM = {G:30, F:18, C1:28, C2:26, C3:24, C4:22};
+const CLEFS = [['G','Sol'],['F','Fa'],['C1','Ut 1'],['C2','Ut 2'],['C3','Ut 3'],['C4','Ut 4']];
+const CLEF_END = {G:32, F:40, C1:32, C2:32, C3:32, C4:32};
+// Fenêtre (en degrés au-dessus de la 1re ligne) où se placent les ♯ / ♭ de l'armure
+const KS_WIN = {G:[3,1], F:[1,-1], C1:[2,0], C2:[2,2], C3:[2,0], C4:[2,2]};
+const yOf = (nt, clef) => ST.top + 40 - (dia(nt) - CLEF_BOTTOM[clef])*5;
+const rangeOf = (clef, n=1) => n > 8 ? [CLEF_BOTTOM[clef]-5, CLEF_BOTTOM[clef]+13] : [CLEF_BOTTOM[clef]-3, CLEF_BOTTOM[clef]+11];
+const isLine = y => Math.abs((((y-ST.top)%10)+10)%10) < .01;
+
+function smoothSegs(p){
+  const segs = [];
+  for(let i=0;i<p.length-1;i++){
+    const p0=p[i-1]||p[i], p1=p[i], p2=p[i+1], p3=p[i+2]||p2;
+    const c1=[p1[0]+(p2[0]-p0[0])/6, p1[1]+(p2[1]-p0[1])/6];
+    const c2=[p2[0]-(p3[0]-p1[0])/6, p2[1]-(p3[1]-p1[1])/6];
+    segs.push(`C${f(c1[0])},${f(c1[1])} ${f(c2[0])},${f(c2[1])} ${f(p2[0])},${f(p2[1])}`);
+  }
+  return segs;
+}
+function pathFrom(p, a=0, b=p.length-1){
+  const s = smoothSegs(p);
+  return `M${f(p[a][0])},${f(p[a][1])}` + s.slice(a, b).join('');
+}
+const TREBLE = [[13.6,31.6],[11,30.2],[11.6,26.8],[15,25],[19,27.2],[20.6,31.8],[18.2,36.8],[12.6,39.2],[7,37.2],[4,31.2],[4.9,24.2],[9.4,17.6],[14.4,11.2],[17.4,3.2],[17,-4.8],[14.6,-10.6],[12,-7.2],[10.6,0],[11,9],[12.3,22],[13.6,35],[14.8,46],[14.4,51.6],[11.4,54.6],[8,53.6],[7,50.2]];
+const UT = [[8.2,-.2],[11.2,-3.2],[15.6,-4.6],[19.6,-7.6],[21,-12.4],[19.6,-17.2],[15.6,-19.6],[11.8,-18.8],[11.4,-15.6]];
+const BASS = [[3.2,9],[5.4,3.6],[11,.6],[17.4,2.4],[20.2,9],[18.6,17.4],[13,25.2],[3.4,32.6]];
+let CLEF_CACHE = {};
+function clefSVG(clef){
+  if(CLEF_CACHE[clef]) return CLEF_CACHE[clef];
+  let s;
+  if(clef[0]==='C'){
+    const cy = ST.top + 40 - (+clef[1]-1)*10;
+    const lo = UT.map(([x,y]) => [x,-y]);
+    s = `<g class="clef" transform="translate(9,${cy})">`
+      + `<rect x="0" y="-20" width="4.6" height="40" style="fill:var(--ink)"/><rect x="6.4" y="-20" width="1.5" height="40" style="fill:var(--ink)"/>`
+      + `<path d="${pathFrom(UT)}" stroke-width="2"/><path d="${pathFrom(UT,2,6)}" stroke-width="3.4"/>`
+      + `<path d="${pathFrom(lo)}" stroke-width="2"/><path d="${pathFrom(lo,2,6)}" stroke-width="3.4"/>`
+      + `<circle cx="13.3" cy="-15.3" r="2.7"/><circle cx="13.3" cy="15.3" r="2.7"/></g>`;
+  } else if(clef==='F'){
+    s = `<g class="clef" transform="translate(12,${ST.top})">`
+      + `<path d="${pathFrom(BASS)}" stroke-width="2.1"/>`
+      + `<path d="${pathFrom(BASS,2,6)}" stroke-width="3.6"/>`
+      + `<circle cx="4.9" cy="10.2" r="3.4"/><circle cx="25.6" cy="5" r="1.75"/><circle cx="25.6" cy="15" r="1.75"/></g>`;
+  } else {
+    s = `<g class="clef" transform="translate(8,${ST.top}) translate(0,30) scale(1.12) translate(0,-30)">`
+      + `<path d="${pathFrom(TREBLE)}" stroke-width="1.9"/>`
+      + `<path d="${pathFrom(TREBLE,4,9)}" stroke-width="3.3"/>`
+      + `<path d="${pathFrom(TREBLE,12,15)}" stroke-width="2.5"/>`
+      + `<circle cx="8.8" cy="50.6" r="2.7"/></g>`;
+  }
+  return CLEF_CACHE[clef] = s;
+}
+function headPath(x, y, k=1){
+  const rx=7.2*k, ry=5*k, ri=4.1*k, rj=2.5*k, deg=-38, a=deg*Math.PI/180;
+  const c=Math.cos(a), s=Math.sin(a);
+  const p1=[x-ri*c, y-ri*s], p2=[x+ri*c, y+ri*s];
+  return `M${f(x-rx)},${f(y)}a${f(rx)},${f(ry)} 0 1,0 ${f(2*rx)},0a${f(rx)},${f(ry)} 0 1,0 ${f(-2*rx)},0Z`
+       + `M${f(p1[0])},${f(p1[1])}A${f(ri)},${f(rj)} ${deg} 1,0 ${f(p2[0])},${f(p2[1])}A${f(ri)},${f(rj)} ${deg} 1,0 ${f(p1[0])},${f(p1[1])}Z`;
+}
+const ACC = {'1':{l:-5.6,r:5.6}, '-1':{l:-3.7,r:5.3}, '2':{l:-5.8,r:5.8}, '-2':{l:-7,r:8.9}, '0':{l:-3.7,r:3.7}};
+function accEls(a, x, y){
+  const L = (x1,y1,x2,y2,w) => `<line x1="${f(x1)}" y1="${f(y1)}" x2="${f(x2)}" y2="${f(y2)}" stroke="currentColor" stroke-width="${w}"/>`;
+  const bar = (xa,xb,cy,rise,th) => `<path d="M${f(xa)},${f(cy+rise/2+th/2)}L${f(xb)},${f(cy-rise/2+th/2)}L${f(xb)},${f(cy-rise/2-th/2)}L${f(xa)},${f(cy+rise/2-th/2)}Z" fill="currentColor"/>`;
+  const flat = x => L(x-3,y-17,x-3,y+5.4,1.25)
+    + `<path d="M${f(x-3)},${f(y-1)}C${f(x-.4)},${f(y-5.4)} ${f(x+5.8)},${f(y-5)} ${f(x+4.3)},${f(y-1.2)}C${f(x+3.3)},${f(y+1.4)} ${f(x+.3)},${f(y+3.6)} ${f(x-3)},${f(y+5.4)}" fill="none" stroke="currentColor" stroke-width="1.9"/>`;
+  switch(a){
+    case 1:  return L(x-2.4,y-11.5,x-2.4,y+14,1.15) + L(x+2.4,y-14,x+2.4,y+11.5,1.15) + bar(x-5.6,x+5.6,y-4.3,3.4,2.7) + bar(x-5.6,x+5.6,y+4.3,3.4,2.7);
+    case -1: return flat(x);
+    case 2: {
+      let s = L(x-3.4,y-3.4,x+3.4,y+3.4,1.3) + L(x-3.4,y+3.4,x+3.4,y-3.4,1.3);
+      for(const [dx,dy] of [[-1,-1],[1,-1],[-1,1],[1,1]]) s += `<rect x="${f(x+dx*4.2-1.6)}" y="${f(y+dy*4.2-1.6)}" width="3.2" height="3.2" fill="currentColor"/>`;
+      return s;
+    }
+    case -2: return flat(x-3.5) + flat(x+3.6);
+    case 0:  return L(x-3,y-15,x-3,y+4.8,1.25) + L(x+3,y-4.8,x+3,y+15,1.25) + bar(x-3,x+3,y-3.5,2,2.6) + bar(x-3,x+3,y+3.5,2,2.6);
+  }
+  return '';
+}
+function accSVG(a, showNat=false){
+  if(!a && !showNat) return '';
+  const g = ACC[String(a)], x0 = g.l-1, w = g.r-g.l+2;
+  return `<svg class="accg" viewBox="${f(x0)} -18 ${f(w)} 34" style="width:${(w/34*.95).toFixed(3)}em" aria-hidden="true">${accEls(a,0,0)}</svg>`;
+}
+function keySig(clef, k){
+  if(!k) return {svg:'', end:0};
+  const sharp = k > 0, n = Math.abs(k), L = KS_WIN[clef][sharp ? 0 : 1], b = CLEF_BOTTOM[clef];
+  const order = sharp ? SHARP_ORDER : FLAT_ORDER, dx = sharp ? 7.4 : 6.6, x0 = CLEF_END[clef] + 5;
+  let svg = '';
+  for(let i=0;i<n;i++){
+    const l = order[i], r = L + ((((l - (b + L)) % 7) + 7) % 7);
+    svg += `<g class="acc">${accEls(sharp ? 1 : -1, x0 + i*dx + (sharp ? 5.6 : 3.7), ST.top + 40 - r*5)}</g>`;
+  }
+  return {svg, end: x0 + n*dx + (sharp ? 5.6 : 5.3)};
+}
+function newDr(clef, key=0){
+  const ks = keySig(clef, key);
+  return {clef, key, ka:keyAcc(key), keySVG:ks.svg, keyEnd:ks.end, heads:[], accs:[], ledg:[], ghosts:[], labels:[], marks:[]};
+}
+// Altération à écrire devant la note, compte tenu de l'armure (null = rien ; 0 = bécarre)
+const written = (dr, nt) => nt.a === dr.ka[nt.l] ? null : nt.a;
+// Positions horizontales, décalées si l'armure est large
+function layout(dr){
+  const xa = Math.max(112, dr.keyEnd + 30);
+  return {xa, xb: Math.max(202, xa + 80), xc: Math.max(135, dr.keyEnd + 44)};
+}
+function placeAcc(dr, nt, x, y, cls){
+  const w = written(dr, nt);
+  if(w === null) return;
+  dr.accs.push({x: x-7.2-2.6-ACC[String(w)].r, y, a:w, cls});
+}
+function addNote(dr, nt, x, cls=''){
+  const y = yOf(nt, dr.clef);
+  dr.heads.push({x, y, cls});
+  dr.ledg.push({xL:x-11, xR:x+11, ys:[y]});
+  placeAcc(dr, nt, x, y, cls);
+  return y;
+}
+function addChord(dr, lo, hi, xc, cls=''){
+  const dd = dia(hi) - dia(lo);
+  let xl = xc, xh = xc;
+  if(dd <= 1){ xl = xc-7.2; xh = xc+7.2; }
+  const yl = yOf(lo, dr.clef), yh = yOf(hi, dr.clef);
+  dr.heads.push({x:xl, y:yl, cls}, {x:xh, y:yh, cls});
+  dr.ledg.push({xL:Math.min(xl,xh)-11, xR:Math.max(xl,xh)+11, ys:[yl,yh]});
+  const col = Math.min(xl,xh) - 7.2 - 2.6;
+  const list = [{w:written(dr,hi), y:yh}, {w:written(dr,lo), y:yl}].filter(e => e.w !== null);
+  if(list.length===2 && dd <= 6){
+    const gu = ACC[String(list[0].w)], gl = ACC[String(list[1].w)];
+    const ux = col - gu.r;
+    dr.accs.push({x:ux, y:list[0].y, a:list[0].w, cls});
+    dr.accs.push({x:ux + gu.l - 2.2 - gl.r, y:list[1].y, a:list[1].w, cls});
+  } else {
+    list.forEach(e => dr.accs.push({x:col-ACC[String(e.w)].r, y:e.y, a:e.w, cls}));
+  }
+}
+function ledgerRange(minY, maxY, xL, xR, cls){
+  let s = '';
+  for(let y=ST.top+50; y<=maxY+.01; y+=10) s += `<line class="${cls}" x1="${f(xL)}" x2="${f(xR)}" y1="${y}" y2="${y}"/>`;
+  for(let y=ST.top-10; y>=minY-.01; y-=10) s += `<line class="${cls}" x1="${f(xL)}" x2="${f(xR)}" y1="${y}" y2="${y}"/>`;
+  return s;
+}
+function staffSVG(dr){
+  const W = ST.W, T = ST.top;
+  let s = `<svg class="staff" viewBox="0 18 ${W} 120" aria-hidden="true">`;
+  for(let i=0;i<5;i++) s += `<line class="sl" x1="3" x2="${W-3}" y1="${T+i*10}" y2="${T+i*10}"/>`;
+  s += clefSVG(dr.clef) + dr.keySVG;
+  for(const g of dr.ghosts) s += ledgerRange(g.y, g.y, g.x-9.5, g.x+9.5, 'gl');
+  for(const L of dr.ledg) s += ledgerRange(Math.min(...L.ys), Math.max(...L.ys), L.xL, L.xR, 'led');
+  for(const g of dr.ghosts) s += `<path class="ghost" fill-rule="evenodd" d="${headPath(g.x, g.y, .86)}"/>`;
+  for(const h of dr.heads) s += `<path class="head ${h.cls||''}" fill-rule="evenodd" d="${headPath(h.x, h.y)}"/>`;
+  for(const a of dr.accs) s += `<g class="acc ${a.cls||''}">${accEls(a.a, a.x, a.y)}</g>`;
+  for(const l of dr.labels) s += `<text class="lab ${l.cls||''}" x="${f(l.x)}" y="133" text-anchor="middle">${l.t}</text>`;
+  for(const m of dr.marks) s += `<text class="mark" x="${f(m.x)}" y="${f(m.y)}" text-anchor="middle">${m.t}</text>`;
+  return s + '</svg>';
+}
+// Degrés montrés par l'indice : tous jusqu'à l'octave ; au-delà, 1 puis l'octave et la suite
+function ladderSteps(n){
+  if(n <= 8) return [...Array(n).keys()];
+  const s = [0];
+  for(let i=7;i<n;i++) s.push(i);
+  return s;
+}
+// Dessin d'un intervalle : q = {kind, clef, key, n1, n2, lo, hi}
+function intervalDrawing(q, o={}){
+  const dr = newDr(q.clef, q.key || 0), cls = o.cls || '';
+  if(o.hide) return dr;
+  const {xa, xb, xc} = layout(dr);
+  if(q.kind === 'harm'){
+    addChord(dr, q.lo, q.hi, xc, cls);
+    if(o.hint){
+      const steps = ladderSteps(dia(q.hi) - dia(q.lo) + 1), m = steps.length;
+      const x0 = xc + 49, dx = Math.min(12.5, (272 - x0)/Math.max(1, m-1));
+      steps.forEach((i, j) => {
+        const x = x0 + j*dx;
+        dr.ghosts.push({x, y: yOf(fromDia(dia(q.lo)+i), q.clef)});
+        dr.labels.push({x, t:i+1});
+      });
+    }
+  } else {
+    addNote(dr, q.n1, xa, cls);
+    addNote(dr, q.n2, xb, cls);
+    if(o.hint) ladder(dr, q.n1, q.n2, xa, xb, false);
+  }
+  return dr;
+}
+function ladder(dr, a, b, xa, xb, withLast){
+  const n = Math.abs(dia(b)-dia(a)) + 1, sg = Math.sign(dia(b)-dia(a)) || 1;
+  const steps = ladderSteps(n), m = steps.length;
+  const xEnd = xb - (written(dr, b) !== null && !withLast ? 12 : 0);
+  steps.forEach((i, j) => {
+    const x = j===0 ? xa : j===m-1 ? xb : xa + (xEnd-xa)*j/(m-1);
+    if((j>0 && j<m-1) || (withLast && j===m-1)) dr.ghosts.push({x, y: yOf(fromDia(dia(a)+sg*i), dr.clef)});
+    dr.labels.push({x, t:i+1});
+  });
+}
+
+// ---------- Utilitaires ----------
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const rnd = a => a[Math.floor(Math.random()*a.length)];
+const randInt = (a, b) => a + Math.floor(Math.random()*(b-a+1));
+function pickW(arr, wf){
+  const ws = arr.map(wf), tot = ws.reduce((a,b)=>a+b, 0);
+  let r = Math.random()*tot;
+  for(let i=0;i<arr.length;i++){ r -= ws[i]; if(r <= 0) return arr[i]; }
+  return arr[arr.length-1];
+}
+const fmtS = ms => (ms/1000).toFixed(1).replace('.', ',') + ' s';
+const fmtDur = ms => String(ms/1000).replace('.', ',') + ' s';
+const ICON = {
+  play:'<svg class="ic" viewBox="0 0 16 16"><path d="M4.5 2.6v10.8l8.6-5.4z" fill="currentColor"/></svg>',
+  up:'<svg class="ic" viewBox="0 0 16 16"><path d="M3.5 12.5 12 4M6 4h6v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  down:'<svg class="ic" viewBox="0 0 16 16"><path d="M3.5 3.5 12 12M12 6v6H6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  sliders:'<svg class="ic" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 5h14M3 10h14M3 15h14"/></g><g style="fill:var(--btn)" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="5" r="2"/><circle cx="13" cy="10" r="2"/><circle cx="8" cy="15" r="2"/></g></svg>',
+  close:'<svg class="ic" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  ear:'<svg viewBox="0 0 64 40" width="64" height="40"><g fill="none" style="stroke:var(--accent)" stroke-width="2" stroke-linecap="round" opacity=".7"><path d="M6 20h4M14 12v16M20 6v28M26 14v12M32 9v22M38 16v8M44 11v18M50 17v6M56 20h2"/></g></svg>',
+};
+
+// ---------- Persistance ----------
+const KEY = 'ecarts.v1';
+const DEFAULTS = {
+  clefs:['G','F'], ivs:['2m','2M','3m','3M','4J','4a','5d','5J','6m','6M','7m','7M','8J'],
+  kinds:['asc','desc','harm'], acc:1, keysig:0, answer:'full', flash:0, timbre:'ep',
+  playOnShow:false, playOnAnswer:true, auto:true, alwaysHint:false, adaptive:true,
+  names:'solf', theme:'auto', stimN:'portee', stimC:'portee'
+};
+const FLASH_STEPS = [0, 1500, 1000, 600, 300];
+function load(){
+  let d = null;
+  try{ d = JSON.parse(localStorage.getItem(KEY)); }catch(e){}
+  d = d || {};
+  const st = Object.assign({}, DEFAULTS, d.settings||{});
+  if(st.clef){ // ancienne version : un seul réglage de clé
+    if(!(d.settings||{}).clefs) st.clefs = st.clef === 'both' ? ['G','F'] : [st.clef];
+    delete st.clef;
+  }
+  st.clefs = (st.clefs || []).filter(c => c in CLEF_BOTTOM);
+  if(!st.clefs.length) st.clefs = ['G'];
+  st.ivs = (st.ivs || []).filter(id => id in IVMAP);
+  if(!FLASH_STEPS.includes(st.flash)) st.flash = 0;
+  if(!['ep','orgue'].includes(st.timbre)) st.timbre = 'ep';
+  if(!['auto','light','dark'].includes(st.theme)) st.theme = 'auto';
+  // v0.6 : clés de sol et de fa par défaut (une installation restée sur la seule clé de sol d'origine passe aux deux)
+  if((d.sv || 0) < 2 && st.clefs.length === 1 && st.clefs[0] === 'G') st.clefs = ['G','F'];
+  return { settings:st, stats:d.stats||{}, records:d.records||{}, guide:d.guide||0, sv:2 };
+}
+let S = load();
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+const darkMQ = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
+function applyTheme(){
+  const t = S.settings.theme, dark = t === 'dark' || (t === 'auto' && !!darkMQ && darkMQ.matches);
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  const m = document.querySelector('meta[name="theme-color"]');
+  if(m) m.setAttribute('content', dark ? '#15110e' : '#e9dfcc');
+}
+
+// ---------- Noms de notes ----------
+const noteName = nt => (S.settings.names==='abc' ? ABC : SOLF)[nt.l];
+const noteHTML = nt => `<span class="nn">${noteName(nt)}${accSVG(nt.a)}</span>`;
+const ACC_TXT = {'-2':' double bémol','-1':' bémol','0':'','1':' dièse','2':' double dièse'};
+
+// ---------- Son ----------
+// Deux timbres : un piano électrique doux (FM) et un orgue tenu (son stable, riche en harmoniques) pour l'oreille.
+const TIMBRES = [['ep','Piano électrique'],['orgue','Orgue tenu']];
+const Snd = {
+  ctx:null, bus:null, wave:null,
+  setup(ctx){
+    this.ctx = ctx;
+    const comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -14; comp.knee.value = 12; comp.ratio.value = 3; comp.attack.value = .004; comp.release.value = .2;
+    const master = ctx.createGain(); master.gain.value = .9;
+    comp.connect(master); master.connect(ctx.destination);
+    this.bus = ctx.createGain(); this.bus.gain.value = .5;
+    this.bus.connect(comp);
+    // petite réverbération de pièce
+    const len = Math.floor(ctx.sampleRate*1.3), ir = ctx.createBuffer(2, len, ctx.sampleRate);
+    for(let ch=0; ch<2; ch++){
+      const d = ir.getChannelData(ch);
+      for(let i=0;i<len;i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/len, 3.2) * (i < 200 ? i/200 : 1);
+    }
+    const conv = ctx.createConvolver(); conv.buffer = ir;
+    const send = ctx.createGain(); send.gain.value = .16;
+    this.bus.connect(send); send.connect(conv); conv.connect(comp);
+    // forme d'onde de l'orgue : tous les harmoniques, décroissants, pairs un peu atténués
+    const H = 18, re = new Float32Array(H+1), im = new Float32Array(H+1);
+    for(let k=1;k<=H;k++) im[k] = (k%2 ? 1 : .72) / Math.pow(k, 1.3);
+    this.wave = ctx.createPeriodicWave(re, im);
+  },
+  ok(){
+    try{
+      if(!this.ctx){
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if(!AC) return false;
+        try{ if(navigator.audioSession) navigator.audioSession.type = 'playback'; }catch(e){}
+        this.setup(new AC());
+      }
+      if(this.ctx.state === 'suspended') this.ctx.resume();
+      return true;
+    }catch(e){ return false; }
+  },
+  freq: nt => 440*Math.pow(2, (semi(nt)-57)/12),
+  // Piano électrique doux (type Rhodes) en synthèse FM :
+  // un «&nbsp;corps&nbsp;» (porteuse + modulatrice au même rapport) et une petite «&nbsp;lame&nbsp;» métallique à l'attaque
+  ep(nt, t, dur){
+    const c = this.ctx, f0 = this.freq(nt);
+    const reg = Math.max(0, Math.min(1, (semi(nt)-24)/60));          // 0 = grave, 1 = aigu
+    const out = c.createGain();
+    out.gain.setValueAtTime(.31*(1 + .1*reg), t);
+    out.gain.setTargetAtTime(0, t+dur, .12);                         // relâchement de la touche
+    const lp = c.createBiquadFilter();
+    lp.type = 'lowpass'; lp.Q.value = .5; lp.frequency.value = Math.min(4200, 900 + f0*3.2);
+    out.connect(lp); lp.connect(this.bus);
+    const stop = t + dur + .8;
+    // corps
+    const car = c.createOscillator(); car.frequency.value = f0;
+    const mod = c.createOscillator(); mod.frequency.value = f0;
+    const idx = c.createGain();                                      // excursion de fréquence (Hz) = indice × f0
+    const i0 = (1.25 - .75*reg)*f0;
+    idx.gain.setValueAtTime(i0, t);
+    idx.gain.setTargetAtTime(.3*f0, t, .35);
+    mod.connect(idx); idx.connect(car.frequency);
+    const amp = c.createGain(), tau = 2.6 - 1.7*reg;
+    amp.gain.setValueAtTime(0, t);
+    amp.gain.linearRampToValueAtTime(1, t+.004);
+    amp.gain.setTargetAtTime(.55, t+.004, .25);
+    amp.gain.setTargetAtTime(0, t+.35, tau);
+    car.connect(amp); amp.connect(out);
+    // lame (attaque légèrement cristalline, très courte)
+    const car2 = c.createOscillator(); car2.frequency.value = f0;
+    const mod2 = c.createOscillator(); mod2.frequency.value = f0*13.97;
+    const idx2 = c.createGain();
+    idx2.gain.setValueAtTime(f0*.9, t); idx2.gain.setTargetAtTime(0, t, .05);
+    mod2.connect(idx2); idx2.connect(car2.frequency);
+    const amp2 = c.createGain();
+    amp2.gain.setValueAtTime(0, t); amp2.gain.linearRampToValueAtTime(.16, t+.002); amp2.gain.setTargetAtTime(0, t+.002, .09);
+    car2.connect(amp2); amp2.connect(out);
+    for(const o of [car, mod, car2, mod2]){ o.start(t); o.stop(stop); }
+  },
+  organ(nt, t, dur){
+    const c = this.ctx, f0 = this.freq(nt);
+    const o = c.createOscillator(); o.setPeriodicWave(this.wave); o.frequency.value = f0;
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = .4; lp.frequency.value = Math.min(6500, f0*12);
+    const g = c.createGain();
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(.2, t+.035);
+    g.gain.setValueAtTime(.2, t+dur);
+    g.gain.linearRampToValueAtTime(0, t+dur+.1);
+    o.connect(lp); lp.connect(g); g.connect(this.bus);
+    o.start(t); o.stop(t+dur+.15);
+  },
+  voice(nt, t, kind){
+    const org = S.settings.timbre === 'orgue';
+    const dur = {harm: org ? 2 : 2.4, first: org ? .62 : .78, second: org ? 1.1 : 1.8, one: org ? 1.1 : 1.6}[kind];
+    org ? this.organ(nt, t, dur) : this.ep(nt, t, dur);
+  },
+  // renvoie le délai (ms) avant que la 2e note ne sonne
+  pair(a, b, together){
+    if(!this.ok()) return 0;
+    const t = this.ctx.currentTime + .06;
+    if(together){ this.voice(a, t, 'harm'); this.voice(b, t, 'harm'); return 60; }
+    this.voice(a, t, 'first'); this.voice(b, t+.7, 'second'); return 760;
+  },
+  one(nt){ if(this.ok()) this.voice(nt, this.ctx.currentTime+.05, 'one'); },
+  // alt : pour un intervalle harmonique, arpéger ; pour un mélodique, jouer ensemble
+  playQ(q, alt){
+    if(!q) return 0;
+    const harm = q.kind === 'harm';
+    if(harm !== !!alt) return this.pair(q.lo, q.hi, true);
+    if(harm) return this.pair(q.lo, q.hi, false);
+    return this.pair(q.n1, q.n2, false);
+  }
+};
+
+// ---------- Statistiques ----------
+// S.stats[mode][intervalle] ; S.stats[mode@clé][intervalle] et [mode@clé]['*'] (toute la clé)
+function bump(all, id, ok, ms){
+  const st = all[id] || (all[id] = {n:0, ok:0, tS:0, tN:0, ema:.5, tEma:0});
+  st.n++; if(ok) st.ok++;
+  st.ema = st.ema*.7 + (ok ? .3 : 0);
+  if(ok && ms != null){
+    st.tS += ms; st.tN++;
+    st.tEma = st.tEma ? st.tEma*.7 + ms*.3 : ms;
+  }
+}
+const statTable = k => S.stats[k] || (S.stats[k] = {});
+function record(mk, id, ok, ms, clef){
+  bump(statTable(mk), id, ok, ms);
+  if(clef){ const t = statTable(mk + '@' + clef); bump(t, id, ok, ms); bump(t, '*', ok, ms); }
+  save();
+}
+function stWeight(st){
+  if(!st || st.n < 2) return 2.2;
+  const slow = st.tEma ? Math.min(1.5, Math.max(0, (st.tEma-1800)/2000)) : .5;
+  return .6 + 4*(1-st.ema) + slow;
+}
+function ivWeight(mk, id, clef){
+  if(!S.settings.adaptive) return 1;
+  const sc = clef ? (S.stats[mk + '@' + clef] || {})[id] : null;
+  return stWeight(sc && sc.n >= 2 ? sc : (S.stats[mk] || {})[id]);
+}
+function pickClef(mk){
+  const cs = S.settings.clefs;
+  if(!mk || cs.length < 2 || !S.settings.adaptive) return rnd(cs);
+  return pickW(cs, c => stWeight((S.stats[mk + '@' + c] || {})['*']));
+}
+const newSess = () => ({n:0, ok:0, streak:0, best:0, tS:0, tN:0});
+function sessUpdate(s, ok, ms, counted){
+  s.n++;
+  if(ok){ s.ok++; if(counted){ s.streak++; s.best = Math.max(s.best, s.streak); } }
+  else s.streak = 0;
+  if(ok && ms != null){ s.tS += ms; s.tN++; }
+}
+function scoreHTML(s){
+  if(!s.n) return '&nbsp;';
+  return `Série <b>${s.streak}</b> · <b>${s.ok}</b>/${s.n} · ${Math.round(100*s.ok/s.n)} %` + (s.tN ? ` · moy. ${fmtS(s.tS/s.tN)}` : '');
+}
+
+// ---------- Génération des questions ----------
+const enabledIvs = () => IVS.filter(i => S.settings.ivs.includes(i.id));
+// Notes de départ : celles de la tonalité (poids 3), plus leurs variantes altérées si le niveau le permet
+function rootPool(level, ka=[0,0,0,0,0,0,0]){
+  const res = [];
+  for(let l=0;l<7;l++){
+    const a0 = ka[l];
+    res.push({l, a:a0, w:3});
+    if(level >= 1) for(const d of [-1,1]){
+      const a = a0 + d;
+      if(Math.abs(a) > (level >= 2 ? 2 : 1)) continue;
+      const rare = Math.abs(a) === 2 || (a===1 && (l===2 || l===6)) || (a===-1 && (l===3 || l===0)); // Mi♯ Si♯ Fa♭ Do♭
+      if(!rare || level >= 2) res.push({l, a, w: rare ? .3 : 1});
+    }
+  }
+  return res;
+}
+function octaves(l, lo, hi){
+  const os = [];
+  for(let o=0;o<=8;o++){ const d = o*7+l; if(d >= lo && d <= hi) os.push(o); }
+  return os;
+}
+const pickKey = () => S.settings.keysig ? randInt(-S.settings.keysig, S.settings.keysig) : 0;
+const R = { tab:'nommer', lastN:null, lastC:null, sprint:null, dirty:false };
+
+function nommerIvs(){
+  const ivs = enabledIvs();
+  // en mode Noms, l'octave n'est pas visible : pas de redoublés
+  return S.settings.stimN === 'noms' ? ivs.filter(i => i.n <= 8) : ivs;
+}
+function genNommer(level = S.settings.acc){
+  const ivs = nommerIvs();
+  if(!ivs.length) return null;
+  const kinds = S.settings.kinds.length ? S.settings.kinds : ['asc'];
+  const mk = modeKeyN(), staff = S.settings.stimN === 'portee', maxA = level === 2 ? 2 : level;
+  for(let t=0; t<80; t++){
+    const clef = pickClef(staff ? mk : null), key = staff ? pickKey() : 0, ka = keyAcc(key);
+    const iv = pickW(ivs, i => ivWeight(mk, i.id, staff ? clef : null) * (i.id === R.lastN ? .3 : 1));
+    const cands = rootPool(level, ka).map(r => ({r, up: transpose({l:r.l, a:r.a, o:4}, iv, 1)}))
+      .filter(c => level === 0 ? c.up.a === ka[c.up.l] : Math.abs(c.up.a) <= maxA);
+    if(!cands.length) continue;
+    const c = pickW(cands, c => c.r.w * (Math.abs(c.up.a) === 2 ? .4 : 1));
+    const [dMin, dMax] = rangeOf(clef, iv.n);
+    const os = octaves(c.r.l, dMin, dMax-(iv.n-1));
+    if(!os.length) continue;
+    const lo = {l:c.r.l, a:c.r.a, o:rnd(os)}, hi = transpose(lo, iv, 1);
+    const kind = rnd(kinds);
+    R.lastN = iv.id;
+    return {iv, kind, clef, key, lo, hi, n1: kind==='desc' ? hi : lo, n2: kind==='desc' ? lo : hi};
+  }
+  return level < 1 ? genNommer(1) : level < 2 ? genNommer(2) : null;
+}
+function genConstruire(){
+  const ivs = enabledIvs();
+  if(!ivs.length) return null;
+  const dirs = S.settings.kinds.filter(k => k !== 'harm');
+  const lvl = S.settings.acc, maxA = lvl === 2 ? 2 : 1, staff = S.settings.stimC === 'portee';
+  for(let t=0; t<80; t++){
+    const clef = pickClef(staff ? 'c' : null), key = staff ? pickKey() : 0, ka = keyAcc(key);
+    const iv = pickW(ivs, i => ivWeight('c', i.id, staff ? clef : null) * (i.id === R.lastC ? .3 : 1));
+    const dir = dirs.length ? rnd(dirs) : 'asc', sg = dir === 'asc' ? 1 : -1;
+    const roots = rootPool(lvl, ka).filter(r => Math.abs(transpose({l:r.l, a:r.a, o:4}, iv, sg).a) <= maxA);
+    if(!roots.length) continue;
+    const r = pickW(roots, r => r.w);
+    const [dMin, dMax] = rangeOf(clef, iv.n);
+    const os = sg > 0 ? octaves(r.l, dMin, dMax-(iv.n-1)) : octaves(r.l, dMin+(iv.n-1), dMax);
+    if(!os.length) continue;
+    const root = {l:r.l, a:r.a, o:rnd(os)}, target = transpose(root, iv, sg);
+    R.lastC = iv.id;
+    return {iv, dir, clef, key, root, target, kind:dir, n1:root, n2:target,
+            lo: sg>0 ? root : target, hi: sg>0 ? target : root};
+  }
+  return null;
+}
+
+// ---------- Contrôles partagés ----------
+const numLabel = n => NUM_SUP[n];
+const SIMPLE_NUMS = [2,3,4,5,6,7,8], COMPOUND_NUMS = [9,10,11,12,13,14,15];
+function accButtons(list, sel){
+  return list.map(a => `<button class="ab ac ${a===sel?'sel':''}" data-a="${a}" aria-label="${a===0?'bécarre':ACC_TXT[a].trim()}">${accSVG(a, true)}</button>`).join('');
+}
+function letterButtons(cls){
+  return [0,1,2,3,4,5,6].map(l => `<button class="ab let ${cls(l)}" data-l="${l}">${(S.settings.names==='abc'?ABC:SOLF)[l]}</button>`).join('');
+}
+function ivGridHTML(isOn, single, nums=SIMPLE_NUMS){
+  let h = `<div class="ivgrid ${single?'single':''}"><span></span>`;
+  for(const n of nums) h += `<span class="gh">${numLabel(n)}</span>`;
+  for(const q of QUALS){
+    h += `<span class="gq">${Q_SHORT[q]}</span>`;
+    for(const n of nums){
+      const id = n+q;
+      h += IVMAP[id] ? `<button class="ivc ${isOn(id)?'on':''}" data-iv="${id}" aria-label="${ivName(n,q)}">${ivSemis(n,q)}</button>` : '<span></span>';
+    }
+  }
+  return h + '</div>';
+}
+function lineSpaceText(q){
+  const tl = isLine(yOf(q.lo, q.clef)), th = isLine(yOf(q.hi, q.clef)), n = q.iv.n;
+  const w = b => b ? 'ligne' : 'interligne';
+  return `${cap(w(tl))} → ${w(th)} : ` + (tl === th
+    ? 'même type, donc intervalle <b>impair</b> (3ce, 5te, 7e…)'
+    : 'types différents, donc intervalle <b>pair</b> (2de, 4te, 6te…)')
+    + (n > 8 ? `<br>${cap(numName(n))} = octave + ${NUM_NAME[n-7]} : retire 7 au chiffre.` : '');
+}
+function armureText(k){
+  if(!k) return '';
+  const ls = (k > 0 ? SHARP_ORDER : FLAT_ORDER).slice(0, Math.abs(k));
+  return 'Armure : ' + ls.map(l => noteHTML({l, a: k > 0 ? 1 : -1, o:4})).join(', ');
+}
+function letterLadder(a, b){
+  const n = Math.abs(dia(b)-dia(a)) + 1, sg = Math.sign(dia(b)-dia(a)) || 1;
+  let h = '<span class="lad">';
+  for(const i of ladderSteps(n)) h += `<span><i>${i+1}</i>${noteName(fromDia(dia(a)+sg*i))}</span>`;
+  return h + '</span>';
+}
+function namesHTML(q, small){
+  if(q.kind === 'harm') return `<div class="names harm ${small?'small':''}"><span>${noteHTML(q.hi)}</span><span class="bar"></span><span>${noteHTML(q.lo)}</span></div>`;
+  return `<div class="names ${small?'small':''}"><span>${noteHTML(q.n1)}</span><span class="arr">${q.kind==='desc'?ICON.down:ICON.up}</span><span>${noteHTML(q.n2)}</span></div>`;
+}
+function scheduleNext(mod, ok, withSound){
+  const sp = R.sprint && R.sprint.m === mod.key;
+  let d = null;
+  if(sp) d = ok ? 260 : 1400;
+  else if(ok && S.settings.auto) d = withSound ? 1500 : 850;
+  if(d != null) mod.timer = setTimeout(() => mod.next(), d);
+}
+
+// ---------- Mode Nommer ----------
+const N = { key:'N', q:null, sel:{n:null, q:null}, ans:null, hint:false, hidden:false, t0:0, timer:0, flashT:0, sess:newSess(), next:() => nextN() };
+const modeKeyN = () => 'n-' + S.settings.stimN;
+const flashOn = () => S.settings.flash > 0 && S.settings.stimN !== 'oreille';
+function playN(alt){
+  const delay = Snd.playQ(N.q, alt);
+  // à l'oreille, le chrono part quand la 2e note a sonné, pas à l'apparition de la question
+  if(N.q && !N.ans && N.t0 == null) N.t0 = performance.now() + delay;
+}
+function nextN(){
+  clearTimeout(N.timer); clearTimeout(N.flashT);
+  N.q = genNommer(); N.sel = {n:null, q:null}; N.ans = null; N.hidden = false;
+  N.hint = S.settings.alwaysHint && !flashOn();          // pas d'indice pendant un flash
+  const ear = S.settings.stimN === 'oreille';
+  N.t0 = ear ? null : performance.now();
+  renderN();
+  if(!N.q) return;
+  if(ear || S.settings.playOnShow) playN();
+  if(flashOn()) N.flashT = setTimeout(() => { if(!N.ans && !N.hint){ N.hidden = true; renderN(); } }, S.settings.flash);
+}
+function pickNum(n){
+  if(N.ans || !N.q || R.locked) return;
+  N.sel.n = n;
+  if(S.settings.answer === 'num') return submitN();
+  if(N.sel.q && !validQ(n, N.sel.q)) N.sel.q = null;
+  if(N.sel.q) return submitN();
+  renderN();
+}
+function pickQual(q){
+  if(N.ans || !N.q || R.locked) return;
+  if(S.settings.answer === 'num') return;
+  if(N.sel.n && !validQ(N.sel.n, q)) return;
+  N.sel.q = q;
+  if(N.sel.n) return submitN();
+  renderN();
+}
+function submitN(){
+  clearTimeout(N.flashT);
+  const {n, q} = N.sel, iv = N.q.iv, st = S.settings.stimN, full = S.settings.answer === 'full';
+  const target = ivSemis(iv.n, iv.q);
+  let ok, enh = false;
+  if(full){
+    ok = n === iv.n && q === iv.q;
+    if(!ok && st === 'oreille' && validQ(n,q) && ivSemis(n,q) === target){ ok = true; enh = true; }
+  } else {
+    ok = n === iv.n;
+    if(!ok && st === 'oreille' && enabledIvs().some(e => e.n === n && ivSemis(e.n,e.q) === target)){ ok = true; enh = true; }
+  }
+  const counted = !N.hint;
+  const ms = N.t0 == null ? null : Math.max(0, Math.min(performance.now() - N.t0, 20000));
+  N.ans = {ok, enh, ms: counted ? ms : null, label: full ? ivName(n,q) : numName(n)};
+  sessUpdate(N.sess, ok, counted ? ms : null, counted);
+  if(counted) record(modeKeyN(), iv.id, ok, ms, st === 'portee' ? N.q.clef : null);
+  if(R.sprint && R.sprint.m === 'N') ok ? R.sprint.ok++ : R.sprint.ko++;
+  renderN();
+  const sound = S.settings.playOnAnswer && !(R.sprint && ok);
+  if(sound) Snd.playQ(N.q);
+  scheduleNext(N, ok, sound);
+}
+function renderN(){
+  const q = N.q, st = S.settings.stimN, a = N.ans, stage = $('#stageN');
+  $$('#stimN button').forEach(b => b.classList.toggle('on', b.dataset.v === st));
+  const fl = $('#flashN');
+  fl.hidden = st === 'oreille';
+  fl.textContent = S.settings.flash ? 'Flash ' + fmtDur(S.settings.flash) : 'Flash';
+  fl.classList.toggle('on', S.settings.flash > 0);
+  $('#nums2N').hidden = !nommerIvs().some(i => i.n > 8);
+  if(!q){
+    const onlyCompound = st === 'noms' && enabledIvs().length;
+    stage.innerHTML = onlyCompound
+      ? '<p class="empty">En mode Noms, les intervalles redoublés ne sont pas proposés (les noms ne disent pas l’octave).<br>Ajoute des intervalles simples dans les réglages.</p>'
+      : '<p class="empty">Aucun intervalle sélectionné.<br>Ouvre les réglages pour en choisir.</p>';
+    $('#hintTextN').innerHTML = ''; $('#fbN').className = 'feedback'; $('#fbN').innerHTML = '';
+    return;
+  }
+  const hint = N.hint || (a && !a.ok);
+  const hidden = N.hidden && !a && !N.hint;
+  let h = '';
+  if(st === 'oreille' && !a) h = `<div class="ear">${ICON.ear}<button class="bigplay" data-act="play" aria-label="Écouter">${ICON.play}</button><span>Écoute, puis réponds</span></div>`;
+  else if(hidden) h = st === 'noms' ? '<div class="names"><span class="qm">· · ·</span></div>' : staffSVG(intervalDrawing(q, {hide:true}));
+  else {
+    if(st === 'noms') h += namesHTML(q, !!a);
+    if(st !== 'noms' || a) h += staffSVG(intervalDrawing(q, {hint: hint && st !== 'noms' || (a && !a.ok), cls: a && a.ok ? 'ok' : ''}));
+  }
+  stage.innerHTML = h;
+  // indice textuel
+  let ht = '';
+  if(hint && st === 'noms') ht = letterLadder(q.n1, q.n2);
+  else if(hint || (a && !a.ok)) ht = lineSpaceText(q) + (q.key ? '<br>' + armureText(q.key) : '');
+  $('#hintTextN').innerHTML = ht;
+  $('#playN').innerHTML = ICON.play + (st === 'oreille' ? ' Réécouter' : ' Écouter');
+  const hb = $('#hintN');
+  hb.textContent = st === 'oreille' ? (q.kind === 'harm' ? 'Arpéger' : 'Ensemble') : 'Indice';
+  hb.classList.toggle('on', st !== 'oreille' && N.hint);
+  const noHint = st !== 'oreille' && flashOn();
+  hb.disabled = noHint && !a;
+  hb.title = noHint ? 'Pas d’indice en mode flash' : '';
+  // boutons
+  $$('#v-nommer .num').forEach(b => {
+    const n = +b.dataset.n;
+    b.classList.toggle('sel', !a && N.sel.n === n);
+    b.classList.toggle('right', !!a && n === q.iv.n);
+    b.classList.toggle('wrong', !!a && !a.ok && N.sel.n === n && n !== q.iv.n);
+  });
+  $('#qualsN').hidden = S.settings.answer === 'num';
+  $$('#qualsN .qual').forEach(b => {
+    const qq = b.dataset.q;
+    b.disabled = !a && N.sel.n != null && !validQ(N.sel.n, qq);
+    b.classList.toggle('sel', !a && N.sel.q === qq);
+    b.classList.toggle('right', !!a && qq === q.iv.q);
+    b.classList.toggle('wrong', !!a && !a.ok && N.sel.q === qq && qq !== q.iv.q);
+  });
+  // retour
+  const fb = $('#fbN');
+  if(!a){ fb.className = 'feedback'; fb.innerHTML = '<span class="prompt">Quel intervalle&nbsp;?</span>'; }
+  else {
+    const name = cap(ivName(q.iv.n, q.iv.q)), s = ivSemis(q.iv.n, q.iv.q);
+    const notes = `${noteHTML(q.n1)} ${q.kind==='harm' ? '+' : '→'} ${noteHTML(q.n2)}`;
+    if(a.ok){
+      fb.className = 'feedback ok';
+      fb.innerHTML = `<div><b>${name}</b> <span class="dim">· ${s}&nbsp;demi&#8209;tons${a.ms != null ? ' · ' + fmtS(a.ms) : ''}</span>`
+        + `<div class="sub">${a.enh ? `Juste à l'oreille (tu as dit ${a.label}) · écrit : ` : ''}${notes}</div></div>`
+        + (S.settings.auto || R.sprint ? '' : '<button class="next" data-act="next">Suivant</button>');
+    } else {
+      fb.className = 'feedback ko';
+      fb.innerHTML = `<div><span class="dim">C'était une</span> <b>${ivName(q.iv.n, q.iv.q)}</b> <span class="dim">· ${s}&nbsp;demi&#8209;tons</span>`
+        + `<div class="sub">${notes} · tu as dit ${a.label}</div></div>`
+        + (R.sprint ? '' : '<button class="next" data-act="next">Suivant</button>');
+    }
+  }
+  $('#scoreN').innerHTML = scoreHTML(N.sess);
+}
+
+// ---------- Mode Construire ----------
+const C = { key:'C', q:null, acc:0, ans:null, hint:false, t0:0, timer:0, sess:newSess(), next:() => nextC() };
+function nextC(){
+  clearTimeout(C.timer);
+  C.q = genConstruire(); C.acc = 0; C.ans = null;
+  C.hint = S.settings.alwaysHint; C.t0 = performance.now();
+  renderC();
+  if(C.q && S.settings.playOnShow) Snd.one(C.q.root);
+}
+function nearestUser(l, a, target){
+  const td = dia(target);
+  for(let d=td-3; d<=td+3; d++) if(((d%7)+7)%7 === l) return fromDia(d, a);
+  return fromDia(td, a);
+}
+function submitC(l){
+  if(C.ans || !C.q || R.locked) return;
+  const t = C.q.target, ok = l === t.l && C.acc === t.a;
+  const ms = Math.min(performance.now() - C.t0, 20000), counted = !C.hint;
+  C.ans = {ok, ms: counted ? ms : null, user: nearestUser(l, C.acc, t), l};
+  sessUpdate(C.sess, ok, counted ? ms : null, counted);
+  if(counted) record('c', C.q.iv.id, ok, ms, S.settings.stimC === 'portee' ? C.q.clef : null);
+  if(R.sprint && R.sprint.m === 'C') ok ? R.sprint.ok++ : R.sprint.ko++;
+  renderC();
+  const sound = S.settings.playOnAnswer && !(R.sprint && ok);
+  if(sound) Snd.pair(C.q.root, C.q.target, false);
+  scheduleNext(C, ok, sound);
+}
+function drawC(q, a, hint){
+  const dr = newDr(q.clef, q.key || 0), {xa, xb} = layout(dr), xu = xb + 50;
+  addNote(dr, q.root, xa, a && a.ok ? 'ok' : '');
+  if(!a){ if(!hint) dr.marks.push({x:xb, y:ST.top+26, t:'?'}); }
+  else {
+    addNote(dr, q.target, xb, a.ok ? 'ok' : '');
+    if(!a.ok){ addNote(dr, a.user, xu, 'ko'); dr.labels.push({x:xu, t:'toi', cls:'ko'}); }
+  }
+  if(hint || (a && !a.ok)) ladder(dr, q.root, q.target, xa, xb, !a);
+  return dr;
+}
+function renderC(){
+  const q = C.q, st = S.settings.stimC, a = C.ans, stage = $('#stageC');
+  $$('#stimC button').forEach(b => b.classList.toggle('on', b.dataset.v === st));
+  if(!q){
+    stage.innerHTML = '<p class="empty">Aucun intervalle sélectionné.<br>Ouvre les réglages pour en choisir.</p>';
+    $('#fbC').innerHTML = ''; $('#hintTextC').innerHTML = '';
+    return;
+  }
+  const n = q.iv.n;
+  let h = `<div class="cprompt"><span class="ivn">${cap(ivName(n, q.iv.q))}</span><span class="dir">${q.dir==='asc' ? ICON.up + ' au-dessus de' : ICON.down + ' en dessous de'}</span></div>`;
+  if(st === 'noms'){
+    h += `<div class="names ${a?'small':''}"><span>${noteHTML(q.root)}</span><span class="arr">${q.dir==='asc'?ICON.up:ICON.down}</span>`
+       + (a ? `<span>${noteHTML(q.target)}</span>` : '<span class="qm">?</span>') + '</div>';
+    if(a) h += staffSVG(drawC(q, a, false));
+  } else h += staffSVG(drawC(q, a, C.hint));
+  stage.innerHTML = h;
+  let ht = '';
+  if(C.hint && !a){
+    ht = (st === 'noms' ? letterLadder(q.root, q.target) : '')
+       + `<div>${cap(ivName(n, q.iv.q))} = <b>${ivSemis(n, q.iv.q)}&nbsp;demi&#8209;tons</b>`
+       + (n > 8 ? ` (octave + ${ivName(n-7, q.iv.q)})` : '') + '</div>'
+       + (st === 'portee' && q.key ? armureText(q.key) : '');
+  } else if(a && !a.ok && st === 'portee' && q.key) ht = armureText(q.key);
+  $('#hintTextC').innerHTML = ht;
+  $('#hintC').classList.toggle('on', C.hint);
+  // boutons
+  const list = S.settings.acc === 2 ? [-2,-1,0,1,2] : [-1,0,1];
+  const accRow = $('#accsC');
+  accRow.style.setProperty('--n', list.length);
+  accRow.innerHTML = accButtons(list, a ? null : C.acc);
+  if(a) $$('.ac', accRow).forEach(b => {
+    const v = +b.dataset.a;
+    if(v === q.target.a) b.classList.add('right');
+    else if(!a.ok && v === a.user.a) b.classList.add('wrong');
+  });
+  $('#letsC').innerHTML = letterButtons(l => !a ? '' : l === q.target.l ? 'right' : (!a.ok && l === a.l) ? 'wrong' : '');
+  const fb = $('#fbC');
+  if(!a){ fb.className = 'feedback'; fb.innerHTML = '<span class="prompt">Quelle note&nbsp;?</span>'; }
+  else {
+    const s = ivSemis(n, q.iv.q);
+    if(a.ok){
+      fb.className = 'feedback ok';
+      fb.innerHTML = `<div><b>${noteHTML(q.target)}</b> <span class="dim">· ${s}&nbsp;demi&#8209;tons${a.ms != null ? ' · ' + fmtS(a.ms) : ''}</span></div>`
+        + (S.settings.auto || R.sprint ? '' : '<button class="next" data-act="next">Suivant</button>');
+    } else {
+      fb.className = 'feedback ko';
+      fb.innerHTML = `<div><span class="dim">C'était</span> <b>${noteHTML(q.target)}</b> <span class="dim">· ${s}&nbsp;demi&#8209;tons</span><div class="sub">tu as dit ${noteHTML(a.user)}</div></div>`
+        + (R.sprint ? '' : '<button class="next" data-act="next">Suivant</button>');
+    }
+  }
+  $('#scoreC').innerHTML = scoreHTML(C.sess);
+}
+
+// ---------- Sprint 60 s ----------
+function sprintKey(m){
+  if(m === 'C') return 'c';
+  return modeKeyN() + '|' + S.settings.answer + (flashOn() ? '|f' + S.settings.flash : '');
+}
+function startSprint(m){
+  endSprint(true);
+  R.sprint = {m, end: performance.now() + 60000, ok:0, ko:0, raf:0};
+  $$('.overlay').forEach(o => o.remove());
+  (m === 'N' ? nextN : nextC)();
+  tickSprint(); syncSprintBtns();
+}
+function tickSprint(){
+  const sp = R.sprint; if(!sp) return;
+  const left = sp.end - performance.now();
+  const bar = $(`#card${sp.m} .timer`);
+  if(bar) bar.style.width = Math.max(0, left/600) + '%';
+  if(left <= 0) return endSprint(false);
+  sp.raf = requestAnimationFrame(tickSprint);
+}
+function endSprint(cancel){
+  const sp = R.sprint; if(!sp) return;
+  cancelAnimationFrame(sp.raf); R.sprint = null;
+  const mod = sp.m === 'N' ? N : C;
+  clearTimeout(mod.timer);
+  $$('.timer').forEach(t => t.style.width = '0');
+  syncSprintBtns();
+  if(cancel){ mod === N ? renderN() : renderC(); return; }
+  const rk = sprintKey(sp.m), prev = S.records[rk] || 0, isRec = sp.ok > prev;
+  if(isRec){ S.records[rk] = sp.ok; save(); }
+  R.locked = true;
+  clearTimeout(N.flashT);
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  ov.innerHTML = `<div class="big">${sp.ok}</div><div>bonne${sp.ok>1?'s':''} réponse${sp.ok>1?'s':''} en 60 secondes</div>`
+    + `<div class="sub">${sp.ko} erreur${sp.ko>1?'s':''}${prev ? ' · record précédent : ' + prev : ''}</div>`
+    + (isRec && prev ? '<div class="rec">Nouveau record</div>' : '')
+    + `<div class="btns"><button class="btn" data-act="closeov">Fermer</button><button class="btn dark" data-act="again">Recommencer</button></div>`;
+  ov.addEventListener('click', e => {
+    const act = e.target.closest('[data-act]')?.dataset.act;
+    if(!act) return;
+    e.stopPropagation();
+    ov.remove(); R.locked = false;
+    if(act === 'again') startSprint(sp.m); else mod.next();
+  });
+  $(`#card${sp.m}`).appendChild(ov);
+}
+function syncSprintBtns(){
+  for(const m of ['N','C']){
+    const b = $(`#sprint${m}`), on = R.sprint && R.sprint.m === m;
+    b.classList.toggle('on', !!on);
+    b.textContent = on ? 'Arrêter' : 'Sprint 60 s';
+  }
+}
+
+// ---------- Repères mélodiques (titres seulement) ----------
+const REPERES = {
+  '2m': {up:['Les Dents de la mer', 'Ode à la joie (après la note répétée)'], down:['Lettre à Élise', 'Joy to the World']},
+  '2M': {up:['Frère Jacques', 'Douce nuit'], down:['Mary Had a Little Lamb', 'Yesterday (Beatles)']},
+  '3m': {up:['Greensleeves', 'Smoke on the Water (riff)'], down:['Hey Jude', 'la moquerie «&nbsp;nananère&nbsp;»']},
+  '3M': {up:['Oh When the Saints'], down:['5e symphonie de Beethoven (après les trois notes répétées)', 'Swing Low, Sweet Chariot']},
+  '4J': {up:['La Marseillaise («&nbsp;Allons enfants&nbsp;»)', 'Mon beau sapin', 'Chœur nuptial de Lohengrin (Wagner)'], down:['Eine kleine Nachtmusik (Mozart)']},
+  '4a': {up:['Maria (West Side Story)'], down:[], tip:'Le triton (trois tons) sonne instable : il «&nbsp;demande&nbsp;» à se résoudre.'},
+  '5J': {up:['Ah ! vous dirai-je, maman (après la note répétée)', 'Ainsi parlait Zarathoustra (Strauss)'], down:['Les Pierrafeu (générique)']},
+  '6m': {up:['The Entertainer (de la 3e à la 4e note)'], down:[]},
+  '6M': {up:['My Bonnie Lies over the Ocean', 'Jingle Bells (couplet)'], down:[]},
+  '7m': {up:['Somewhere (West Side Story)'], down:[], tip:'Une octave moins un ton.'},
+  '7M': {up:[], down:[], tip:'Une octave moins un demi-ton : on entend l’octave «&nbsp;qui manque&nbsp;».'},
+  '8J': {up:['Over the Rainbow'], down:[]},
+};
+const REP_ORDER = ['2m','2M','3m','3M','4J','4a','5J','6m','6M','7m','7M','8J'];
+function tipsStaff(){
+  const dr = newDr('G'), g = (d, x, t) => { dr.ghosts.push({x, y: yOf(fromDia(d), 'G')}); dr.labels.push({x, t}); };
+  addNote(dr, {l:2, a:0, o:4}, 74); dr.labels.push({x:74, t:1});          // Mi sur une ligne
+  g(32, 98, 3); g(34, 120, 5); g(36, 142, 7);                             // lignes au-dessus
+  addNote(dr, {l:2, a:0, o:4}, 178); dr.labels.push({x:178, t:1});
+  g(31, 200, 2); g(33, 222, 4); g(35, 244, 6); g(37, 266, 8);             // interlignes au-dessus
+  return staffSVG(dr);
+}
+function tipsHTML(){
+  const n = l => noteName({l});
+  const pair = (a, b) => `${n(a)}–${n(b)}`;
+  const reps = REP_ORDER.map(id => {
+    const r = REPERES[id], iv = IVMAP[id];
+    const line = (arr, dir) => arr.length ? `<div class="rep-l"><span class="rep-d">${dir > 0 ? ICON.up : ICON.down}</span>${arr.join(' · ')}</div>` : '';
+    return `<div class="rep"><div class="rep-h"><b>${cap(ivName(iv.n, iv.q))}</b><span>`
+      + `<button class="ghostbtn" data-rp="${id}" data-dir="1" aria-label="Écouter en montant">${ICON.play}${ICON.up}</button>`
+      + `<button class="ghostbtn" data-rp="${id}" data-dir="-1" aria-label="Écouter en descendant">${ICON.play}${ICON.down}</button></span></div>`
+      + line(r.up, 1) + line(r.down, -1) + (r.tip ? `<div class="rep-l rep-tip">${r.tip}</div>` : '') + '</div>';
+  }).join('');
+  return `
+<div class="pcard"><h3>Le chiffre d’un coup d’œil</h3>
+<div class="gstaff">${tipsStaff()}</div>
+<ul class="tips">
+<li><b>Même type</b> (ligne → ligne, interligne → interligne) : intervalle <b>impair</b>. <b>Types différents</b> : intervalle <b>pair</b>.</li>
+<li>Compte de deux en deux : depuis une ligne, la ligne suivante donne la 3ce, puis la 5te, la 7e, la 9e. Les interlignes donnent 2, 4, 6, 8.</li>
+<li>Joués ensemble : deux notes qui se touchent font une <b>3ce</b> ; deux notes décalées côte à côte, une <b>2de</b>.</li>
+<li>L’octave relie une ligne et un interligne, avec trois lignes entières entre les deux.</li>
+</ul></div>
+<div class="pcard"><h3>Trouver la qualité</h3>
+<p class="note">Sur les notes naturelles, retiens seulement les exceptions :</p>
+<ul class="tips">
+<li><b>2des</b> : mineures ${pair(2,3)} et ${pair(6,0)}, les autres majeures.</li>
+<li><b>3ces</b> : majeures ${pair(0,2)}, ${pair(3,5)}, ${pair(4,6)}, les autres mineures.</li>
+<li><b>4tes</b> : toutes justes, sauf ${pair(3,6)} (augmentée : le triton).</li>
+<li><b>5tes</b> : toutes justes, sauf ${pair(6,3)} (diminuée).</li>
+<li><b>6tes</b> : mineures ${pair(2,0)}, ${pair(5,3)}, ${pair(6,4)}, les autres majeures.</li>
+<li><b>7es</b> : majeures ${pair(0,6)} et ${pair(3,2)}, les autres mineures.</li>
+</ul>
+<p class="note">Puis applique les altérations :</p>
+<ul class="tips">
+<li>La même altération sur les deux notes ne change rien : ${n(1)}${accSVG(-1)}–${n(3)}${accSVG(-1)} est une 3ce mineure, comme ${pair(1,3)}.</li>
+<li>Note du haut montée (♯) ou note du bas descendue (♭) : l’intervalle grandit d’un demi-ton. L’inverse le rétrécit.</li>
+<li>Diminuée ← mineure ← majeure → augmentée ; diminuée ← juste → augmentée.</li>
+</ul></div>
+<div class="pcard"><h3>Renversements et grands intervalles</h3>
+<ul class="tips">
+<li>Un intervalle et son renversement font <b>9</b> : 2de ↔ 7e, 3ce ↔ 6te, 4te ↔ 5te. Majeure ↔ mineure, augmentée ↔ diminuée, juste reste juste.</li>
+<li>Pratique pour les grands intervalles : ${pair(2,0)}, 6te mineure, c’est le renversement de ${pair(0,2)}, 3ce majeure.</li>
+<li>Une 6te majeure descendante arrive sur la même note qu’une 3ce mineure montante, une octave plus bas.</li>
+<li>Redoublés : retire 7 au chiffre (10e = 3ce, 12e = 5te), la qualité ne change pas.</li>
+</ul></div>
+<div class="pcard"><h3>Repères mélodiques</h3>
+<p class="note">Le début de mélodies connues. Un repère ne marche que si tu connais déjà la mélodie : garde ceux qui te parlent.</p>
+${reps}</div>
+<div class="pcard"><h3>Repères de clés</h3>
+<ul class="tips">
+<li><b>Sol</b> : la note sur la 2e ligne, là où s’enroule la clé, est ${n(4)}.</li>
+<li><b>Fa</b> : la note sur la 4e ligne, entre les deux points, est ${n(3)}.</li>
+<li><b>Ut</b> : la note sur la ligne où se pince la clé est le ${n(0)} central (Ut 3 : 3e ligne, Ut 4 : 4e ligne).</li>
+<li>Pars de ce repère et lis en intervalles plutôt que de compter depuis le bas de la portée.</li>
+</ul></div>`;
+}
+
+// ---------- Explorer ----------
+const E = { l:0, a:0, iv:'3M', dir:'asc', clef:null, count:false, view:'fiche' };
+function exQ(){
+  const iv = IVMAP[E.iv], clef = E.clef || S.settings.clefs[0];
+  const [r0, r1] = rangeOf(clef, iv.n), pad = iv.n > 8 ? 0 : 2;
+  const dMin = r0 - pad, dMax = r1 + pad, sg = E.dir === 'desc' ? -1 : 1;
+  const lo = sg > 0 ? dMin : dMin+iv.n-1, hi = sg > 0 ? dMax-(iv.n-1) : dMax, mid = (lo+hi)/2;
+  const os = octaves(E.l, lo, hi);
+  const o = os.length ? os.reduce((b, o) => Math.abs(o*7+E.l-mid) < Math.abs(b*7+E.l-mid) ? o : b) : 4;
+  const root = {l:E.l, a:E.a, o}, target = transpose(root, iv, sg);
+  return {iv, clef, key:0, kind:E.dir, root, target, n1:root, n2:target, lo: sg>0 ? root : target, hi: sg>0 ? target : root};
+}
+function keyboardSVG(a, b){
+  const sa = semi(a), sb = semi(b), lo = Math.min(sa, sb), hi = Math.max(sa, sb), base = Math.floor(lo/12)*12;
+  const W = hi - base > 24 ? 22 : 15, ww = 14, H = 46;
+  const cls = s => s === lo || s === hi ? 'hit' : (s > lo && s < hi ? 'mid' : '');
+  let s = `<svg viewBox="0 0 ${W*ww+1} ${H+1}" aria-hidden="true">`;
+  for(let k=0;k<W;k++){
+    const off = Math.floor(k/7)*12 + PC[k%7];
+    s += `<rect class="kw ${cls(base+off)}" x="${k*ww+.5}" y=".5" width="${ww}" height="${H}" rx="1.5"/>`;
+  }
+  for(let k=0;k<W-1;k++){
+    const pc = k%7;
+    if(pc === 2 || pc === 6) continue;
+    const off = Math.floor(k/7)*12 + PC[pc] + 1;
+    s += `<rect class="kbk ${cls(base+off)}" x="${(k+1)*ww-4.2+.5}" y=".5" width="8.4" height="${H*.6}" rx="1"/>`;
+  }
+  return s + '</svg>';
+}
+function renderE(){
+  $$('#viewE button').forEach(b => b.classList.toggle('on', b.dataset.v === E.view));
+  $('#ficheE').hidden = E.view !== 'fiche';
+  $('#tipsE').hidden = E.view !== 'tips';
+  if(E.view === 'tips'){ $('#tipsE').innerHTML = tipsHTML(); return; }
+  const q = exQ(), iv = q.iv, s = ivSemis(iv.n, iv.q), cmp = iv.n > 8;
+  const clef = E.clef || S.settings.clefs[0];
+  $$('#clefE button').forEach(b => b.classList.toggle('on', b.dataset.v === clef));
+  $$('#dirE button').forEach(b => b.classList.toggle('on', b.dataset.v === E.dir));
+  $$('#cmpE button').forEach(b => b.classList.toggle('on', (b.dataset.v === '1') === cmp));
+  $('#accE').innerHTML = accButtons([-1,0,1], E.a);
+  $('#letE').innerHTML = letterButtons(l => l === E.l ? 'sel' : '');
+  $('#gridE').innerHTML = ivGridHTML(id => id === E.iv, true, cmp ? COMPOUND_NUMS : SIMPLE_NUMS);
+  $('#countE').classList.toggle('on', E.count);
+  if(Math.abs(q.target.a) > 2){
+    $('#stageE').innerHTML = `<p class="warn">${cap(ivName(iv.n, iv.q))} ${E.dir==='desc'?'en dessous de':'au-dessus de'} ${noteHTML(q.root)} demanderait une triple altération.</p>`;
+    $('#infoE').innerHTML = ''; $('#kbE').innerHTML = '';
+    return;
+  }
+  $('#stageE').innerHTML = staffSVG(intervalDrawing(q, {hint: E.count}));
+  const inv = inversion(iv.n, iv.q), sp = simpleN(iv.n), ss = ivSemis(sp, iv.q);
+  $('#infoE').innerHTML = `<div class="exhead"><span class="exname">${cap(ivName(iv.n, iv.q))}</span>`
+    + `<span class="exnotes">${noteHTML(q.n1)} ${E.dir==='harm' ? '+' : (E.dir==='desc' ? ICON.down : ICON.up)} ${noteHTML(q.n2)}</span></div>`
+    + `<dl class="facts"><dt>Demi-tons</dt><dd>${s}</dd>`
+    + (cmp ? `<dt>Simple</dt><dd>Octave + ${ivName(sp, iv.q)} (${ss})</dd>` : '')
+    + `<dt>Renversement</dt><dd>${cap(ivName(inv.n, inv.q))} (${12-ss})${cmp ? ', sur l’intervalle simple' : ''}</dd>`
+    + `<dt>Sur la portée</dt><dd>${lineSpaceText(q)}</dd>`
+    + (() => { const r = REPERES[iv.id]; if(!r || !(r.up.length || r.down.length)) return '';
+        return `<dt>Repères</dt><dd>${r.up.length ? ICON.up + ' ' + r.up.join(' · ') : ''}${r.up.length && r.down.length ? '<br>' : ''}${r.down.length ? ICON.down + ' ' + r.down.join(' · ') : ''}</dd>`; })()
+    + '</dl>';
+  $('#kbE').innerHTML = keyboardSVG(q.lo, q.hi);
+}
+
+// ---------- Progrès ----------
+const MODES = [['n-portee','Portée'],['n-noms','Noms'],['n-oreille','Oreille'],['c','Constr.']];
+const CLEF_LABEL = Object.fromEntries(CLEFS);
+const P = { clef:'all' };
+const mixBg = p => {
+  const t = Math.max(0, Math.min(1, (p-50)/50));
+  const c = [176+(85-176)*t, 58+(112-58)*t, 38+(58-38)*t].map(Math.round);
+  return `rgba(${c.join(',')},.2)`;
+};
+function statCell(st){
+  if(!st) return '<td class="na">·</td>';
+  const p = Math.round(100*st.ok/st.n);
+  return `<td style="background:${mixBg(p)}"><b>${p} %</b><small>${st.tN ? fmtS(st.tS/st.tN) : '–'} · ${st.n}×</small></td>`;
+}
+function renderP(){
+  const labels = {'n-portee':'Nommer · portée','n-noms':'Nommer · noms','n-oreille':'Nommer · oreille','c':'Construire'};
+  const recs = Object.entries(S.records).sort();
+  $('#recP').innerHTML = recs.length
+    ? '<div class="recs">' + recs.map(([k, v]) => {
+        const [mk, ans, fl] = k.split('|');
+        const det = [ans ? (ans === 'num' ? 'chiffre seul' : 'complet') : '', fl ? 'flash ' + fmtDur(+fl.slice(1)) : ''].filter(Boolean).join(', ');
+        return `<span>${labels[mk] || mk}${det ? ` <span style="color:var(--ink3)">(${det})</span>` : ''}</span><b>${v}</b>`;
+      }).join('') + '</div>'
+    : '<p class="note" style="margin:0">Pas encore de sprint. Lance «&nbsp;Sprint 60 s&nbsp;» dans Nommer ou Construire.</p>';
+  // par clé
+  const used = CLEFS.filter(([c]) => ['n-portee','c'].some(mk => (S.stats[mk + '@' + c] || {})['*']));
+  $('#clefTabP').innerHTML = used.length
+    ? '<table class="pt"><tr><th></th><th>Nommer (portée)</th><th>Construire</th></tr>'
+      + used.map(([c, l]) => `<tr><td class="iv">${l}</td>${statCell((S.stats['n-portee@'+c] || {})['*'])}${statCell((S.stats['c@'+c] || {})['*'])}</tr>`).join('')
+      + '</table>'
+    : '<p class="note" style="margin:0">Apparaît après quelques réponses sur portée.</p>';
+  // filtre de clé pour le tableau par intervalle
+  if(P.clef !== 'all' && !used.some(([c]) => c === P.clef)) P.clef = 'all';
+  const fp = $('#clefP');
+  fp.hidden = !used.length;
+  fp.innerHTML = `<button data-v="all" class="${P.clef==='all'?'on':''}">Toutes</button>`
+    + used.map(([c, l]) => `<button data-v="${c}" class="${P.clef===c?'on':''}">${l}</button>`).join('');
+  const cols = P.clef === 'all' ? MODES : [['n-portee@'+P.clef, 'Nommer (portée)'], ['c@'+P.clef, 'Construire']];
+  const rows = IVS.filter(i => S.settings.ivs.includes(i.id) || cols.some(([k]) => (S.stats[k] || {})[i.id]));
+  let h = '<table class="pt"><tr><th></th>' + cols.map(([, l]) => `<th>${l}</th>`).join('') + '</tr>';
+  for(const iv of rows){
+    h += `<tr><td class="iv">${NUM_TXT[iv.n]} ${Q_SHORT[iv.q]}</td>` + cols.map(([k]) => statCell((S.stats[k] || {})[iv.id])).join('') + '</tr>';
+  }
+  $('#tabP').innerHTML = rows.length ? h + '</table>' : '<p class="note">Aucune donnée.</p>';
+}
+
+// ---------- Export / import de la progression (JSON) ----------
+const MODE_KEY_RE = /^(n-(portee|noms|oreille)|c)(@(G|F|C[1-4]))?$/;
+const nRep = n => n + (n > 1 ? ' réponses' : ' réponse');
+const answersCount = stats => Object.entries(stats).filter(([k]) => !k.includes('@'))
+  .reduce((a, [, t]) => a + Object.values(t).reduce((b, s) => b + (s.n || 0), 0), 0);
+function exportProgress(){
+  const now = new Date(), day = now.toISOString().slice(0, 10);
+  const data = {app:'ecarts', type:'progression', format:1, version:APP_VERSION, date:now.toISOString(), stats:S.stats, records:S.records};
+  const blob = new Blob([JSON.stringify(data, null, 1)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `ecarts-progression-${day}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  ioMsg(`Fichier «&nbsp;${a.download}&nbsp;» créé (${nRep(answersCount(S.stats))}).`, 'ok');
+}
+// Ne garde que ce que l'appli sait lire : modes, intervalles et nombres valides
+function cleanProgress(d){
+  if(!d || typeof d !== 'object' || d.app !== 'ecarts' || typeof d.stats !== 'object' || !d.stats) return null;
+  const num = v => (typeof v === 'number' && isFinite(v) && v >= 0) ? v : 0;
+  const stats = {};
+  for(const [mk, t] of Object.entries(d.stats)){
+    if(!MODE_KEY_RE.test(mk) || !t || typeof t !== 'object') continue;
+    for(const [id, s] of Object.entries(t)){
+      if(!(id in IVMAP || id === '*') || !s || typeof s !== 'object') continue;
+      const n = Math.round(num(s.n));
+      if(!n) continue;
+      const ok = Math.min(n, Math.round(num(s.ok)));
+      (stats[mk] || (stats[mk] = {}))[id] = {n, ok, tS:num(s.tS), tN:Math.round(num(s.tN)),
+        ema: typeof s.ema === 'number' && isFinite(s.ema) ? Math.max(0, Math.min(1, s.ema)) : ok/n, tEma:num(s.tEma)};
+    }
+  }
+  const records = {};
+  for(const [k, v] of Object.entries(d.records || {})) if(typeof k === 'string' && k.length < 60 && num(v)) records[k] = Math.round(num(v));
+  return {stats, records, date:d.date};
+}
+let pendingImport = null;
+function ioMsg(html, cls=''){ $('#ioMsg').className = 'iomsg ' + cls; $('#ioMsg').innerHTML = html; }
+function readImport(file){
+  const r = new FileReader();
+  r.onload = () => {
+    let d = null;
+    try{ d = cleanProgress(JSON.parse(r.result)); }catch(e){}
+    if(!d) return ioMsg('Ce fichier n’est pas une sauvegarde d’ÉCARTS.', 'ko');
+    pendingImport = d;
+    const when = d.date && !isNaN(new Date(d.date)) ? ' du ' + new Date(d.date).toLocaleDateString('fr-BE') : '';
+    ioMsg(`Sauvegarde${when} : ${nRep(answersCount(d.stats))}. Remplacer ta progression actuelle (${nRep(answersCount(S.stats))})&nbsp;?`
+      + '<div class="iorow"><button class="btn" data-io="cancel">Annuler</button><button class="btn dark" data-io="apply">Remplacer</button></div>');
+  };
+  r.onerror = () => ioMsg('Impossible de lire ce fichier.', 'ko');
+  r.readAsText(file);
+}
+
+// ---------- Réglages ----------
+const SET_UI = [
+  {k:'clefs', label:'Clés', type:'multi', opts:CLEFS,
+    help:'Plusieurs choix possibles : les clés sélectionnées alternent (la moins maîtrisée revient plus souvent). Ut 1 à Ut 4 = clé d’ut sur la 1re à la 4e ligne (Ut&nbsp;3&nbsp;: alto, Ut&nbsp;4&nbsp;: ténor).'},
+  {k:'ivs', label:'Intervalles travaillés', type:'ivgrid'},
+  {k:'kinds', label:'Présentation', type:'multi', opts:[['asc','Ascendant'],['desc','Descendant'],['harm','Harmonique']],
+    help:'En mode Construire, «&nbsp;harmonique&nbsp;» est traité comme ascendant.'},
+  {k:'keysig', label:'Armure', type:'seg', opts:[[0,'Aucune'],[3,'Jusqu’à 3'],[7,'Jusqu’à 7']],
+    help:'Sur portée, une armure tirée au hasard suit la clé. Les notes en tiennent compte et les altérations écrites (bécarres compris) s’y rapportent.'},
+  {k:'acc', label:'Altérations accidentelles', type:'seg', opts:[[0,'Aucune'],[1,'Simples'],[2,'Doubles']],
+    help:'«&nbsp;Aucune&nbsp;» : rien d’écrit devant les notes (sans armure : notes naturelles ; avec armure : notes de la tonalité). En Construire, la réponse peut quand même porter un dièse ou un bémol.'},
+  {k:'answer', label:'Réponse en mode Nommer', type:'seg', opts:[['num','Chiffre seul'],['full','Chiffre + qualité']]},
+  {k:'timbre', label:'Son', type:'seg', opts:TIMBRES,
+    help:'Orgue tenu : un son stable et soutenu, riche en harmoniques, qui laisse bien entendre la couleur des intervalles (surtout joués ensemble). Toucher un choix le fait écouter.'},
+  {k:'playOnShow', label:'Jouer le son dès l’apparition', type:'toggle'},
+  {k:'playOnAnswer', label:'Jouer le son après la réponse', type:'toggle'},
+  {k:'auto', label:'Enchaîner après une bonne réponse', type:'toggle'},
+  {k:'alwaysHint', label:'Indice toujours visible', type:'toggle', help:'Mode découverte : ces réponses ne comptent pas dans la progression. Sans effet en mode flash, où les indices sont coupés.'},
+  {k:'adaptive', label:'Revenir plus souvent sur les points faibles', type:'toggle', help:'Intervalles et clés les moins maîtrisés.'},
+  {k:'names', label:'Noms des notes', type:'seg', opts:[['solf','Do Ré Mi'],['abc','C D E']]},
+  {k:'theme', label:'Apparence', type:'seg', opts:[['auto','Auto'],['light','Clair'],['dark','Sombre']],
+    help:'Auto suit le mode clair ou sombre du téléphone ou de l’ordinateur.'},
+];
+const NUMERIC = ['acc','keysig'];
+const PRESETS = {
+  'Base': ['2m','2M','3m','3M','4J','5J','6m','6M','7m','7M','8J'],
+  'Base + triton': DEFAULTS.ivs,
+  'Toutes les simples': SIMPLE_IDS,
+  'Tierces et quintes': ['3m','3M','5J'],
+  'Redoublés': ['9m','9M','10m','10M','11J','12J','13m','13M','14m','14M','15J'],
+};
+function buildSettings(){
+  let h = '';
+  for(const it of SET_UI){
+    if(it.type === 'toggle'){
+      h += `<div class="set"><div class="tglrow"><span class="set-l">${it.label}</span><button class="tg" data-k="${it.k}" role="switch" aria-label="${it.label}"><i></i></button></div>`
+        + (it.help ? `<p class="help">${it.help}</p>` : '') + '</div>';
+      continue;
+    }
+    h += `<div class="set"><div class="set-l">${it.label}</div>`;
+    if(it.type === 'seg' || it.type === 'multi')
+      h += `<div class="seg" data-k="${it.k}" data-type="${it.type}">` + it.opts.map(([v, l]) => `<button data-v="${v}">${l}</button>`).join('') + '</div>';
+    if(it.type === 'ivgrid')
+      h += '<div class="presets">' + Object.keys(PRESETS).map(p => `<button data-preset="${p}">${p}</button>`).join('') + '</div>'
+        + '<div id="setGrid"></div><div class="gridsub">Redoublés</div><div id="setGrid2"></div>'
+        + '<p class="gridnote">Le chiffre dans chaque case = nombre de demi-tons.</p>';
+    if(it.help) h += `<p class="help">${it.help}</p>`;
+    h += '</div>';
+  }
+  $('#setBody').innerHTML = h;
+  syncSettings();
+}
+function syncSettings(){
+  const st = S.settings;
+  $$('#setBody .seg').forEach(seg => {
+    const k = seg.dataset.k, multi = seg.dataset.type === 'multi';
+    $$('button', seg).forEach(b => b.classList.toggle('on', multi ? st[k].includes(b.dataset.v) : String(st[k]) === b.dataset.v));
+  });
+  $$('#setBody .tg').forEach(b => { b.classList.toggle('on', !!st[b.dataset.k]); b.setAttribute('aria-checked', !!st[b.dataset.k]); });
+  $('#setGrid').innerHTML = ivGridHTML(id => st.ivs.includes(id), false, SIMPLE_NUMS);
+  $('#setGrid2').innerHTML = ivGridHTML(id => st.ivs.includes(id), false, COMPOUND_NUMS);
+}
+function openSheet(){ endSprint(true); syncSettings(); $("#sheet").hidden = false; }
+function closeSheet(){
+  $('#sheet').hidden = true;
+  if(R.dirty){
+    R.dirty = false;
+    nextN(); nextC();
+    if(R.tab === 'explorer') renderE();
+    if(R.tab === 'progres') renderP();
+  }
+}
+
+// ---------- Guide ----------
+const GUIDE_VERSION = 1;
+const G = { i:0 };
+function guideStaff(){
+  const dr = newDr('G'), N4 = (l, o=4) => ({l, a:0, o});
+  addNote(dr, N4(2), 92); addNote(dr, N4(4), 128);
+  addNote(dr, N4(2), 196); addNote(dr, N4(5), 232);
+  dr.labels.push({x:110, t:'3ce · impair'}, {x:214, t:'4te · pair'});
+  return staffSVG(dr);
+}
+function guidePages(){
+  const nm = l => noteName({l});
+  return [
+`<h2>Bienvenue dans ÉCARTS</h2>
+<p>De quoi travailler les intervalles à l’œil, par cœur et à l’oreille. Quatre onglets :</p>
+<ul>
+<li><b>Nommer</b> : on te montre un intervalle, tu dis lequel c’est.</li>
+<li><b>Construire</b> : on te donne une note et un intervalle, tu trouves l’autre note.</li>
+<li><b>Explorer</b> : la fiche de chaque intervalle (portée, demi-tons, renversement, clavier, son).</li>
+<li><b>Progrès</b> : ta réussite et ton temps de réponse, par intervalle et par clé.</li>
+</ul>`,
+`<h2>Nommer</h2>
+<p>En haut, choisis ce qu’on te montre : <b>Portée</b>, <b>Noms</b> (${nm(1)} → ${nm(3)}${accSVG(1)}, pour le par cœur) ou <b>Oreille</b> (le son seul).</p>
+<p>Réponds avec le chiffre, puis la qualité :</p>
+<div class="gmock"><span class="ab num sel"><span>${numLabel(3)}</span></span><span class="ab qual sel">maj.</span><span class="ab qual">min.</span><span class="ab qual" style="opacity:.28">juste</span></div>
+<p>Les qualités impossibles sont grisées (une tierce n’est jamais juste). Après une erreur, la bonne réponse s’affiche, avec les notes comptées sur la portée.</p>`,
+`<h2>Construire</h2>
+<p>On te demande par exemple : <b>sixte mineure en dessous de ${nm(2)}</b>. Choisis d’abord l’altération (le bécarre est déjà sélectionné), puis touche la note :</p>
+<div class="gmock">${accButtons([-1,0,1], 0)}<span class="ab let">${nm(0)}</span><span class="ab let">${nm(1)}</span><span class="ab let">…</span></div>
+<p>Le bécarre veut dire «&nbsp;note naturelle&nbsp;», quelle que soit l’armure.</p>`,
+`<h2>Lire vite</h2>
+<div class="gstaff">${guideStaff()}</div>
+<p><b>Ligne → ligne</b> (ou interligne → interligne) : intervalle impair (3ce, 5te, 7e). <b>Ligne → interligne</b> : intervalle pair (2de, 4te, 6te).</p>
+<ul>
+<li><b>Indice</b> : compte les notes à ta place et rappelle cette règle. Une réponse avec indice ne compte pas dans tes stats.</li>
+<li><b>Flash</b> : les notes ne restent affichées qu’un instant, pour reconnaître la forme sans compter. Touche le bouton pour changer la durée. Les indices sont alors coupés.</li>
+</ul>`,
+`<h2>Choisir les intervalles</h2>
+<p>Dans les réglages, la grille <b>Intervalles travaillés</b> se lit comme un tableau :</p>
+<div class="gmock gmock-grid">${ivGridHTML(id => ['3m','3M','5J'].includes(id), false, [2,3,4,5])}</div>
+<ul>
+<li>en colonnes, le <b>chiffre</b> (2de, 3ce…), et en dessous une deuxième grille pour les redoublés (9e à 15e) ;</li>
+<li>en lignes, la <b>qualité</b> ;</li>
+<li>dans chaque case, le nombre de <b>demi-tons</b>. Deux cases avec le même nombre sonnent pareil (4te aug. et 5te dim. : 6).</li>
+</ul>
+<p>Touche une case pour l’ajouter ou la retirer : en couleur, elle est travaillée. Les boutons au-dessus préparent des sélections toutes faites (Base, Base + triton, Tierces et quintes…).</p>
+<p>Juste en dessous, <b>Présentation</b>, <b>Armure</b> et <b>Altérations</b> règlent la difficulté de lecture.</p>`,
+`<h2>Le reste</h2>
+<ul>
+<li>${ICON.play} <b>Écouter</b> : joue l’intervalle, au piano électrique ou à l’orgue tenu (réglages), où tu peux aussi le faire jouer tout seul.</li>
+<li><b>Sprint 60 s</b> : un maximum de bonnes réponses en une minute, avec un record.</li>
+<li>${ICON.sliders} <b>Réglages</b>, en haut à droite : clés (sol, fa, ut 1 à 4), intervalles travaillés (le chiffre dans chaque case = demi-tons), présentation, armure, altérations, son.</li>
+<li><b>Explorer › Astuces</b> : des trucs pour lire vite et des mélodies connues qui commencent par chaque intervalle.</li>
+<li>Les intervalles et les clés que tu rates reviennent plus souvent. Tout est enregistré sur cet appareil.</li>
+</ul>
+<p>Le bouton <b>?</b> en haut ouvre le mode d’emploi complet.</p>`,
+  ];
+}
+function renderGuide(){
+  const pages = guidePages(), n = pages.length;
+  G.i = Math.max(0, Math.min(n-1, G.i));
+  const body = $('#guideBody');
+  body.innerHTML = `<div class="kick">Guide · ${G.i+1}/${n}</div>` + pages[G.i];
+  body.scrollTop = 0;
+  $('#guideDots').innerHTML = pages.map((_, j) => `<button class="${j===G.i?'on':''}" data-i="${j}" aria-label="Page ${j+1}"></button>`).join('');
+  $('#guidePrev').textContent = G.i === 0 ? 'Passer' : 'Précédent';
+  $('#guideNext').textContent = G.i === n-1 ? 'C’est parti' : 'Suivant';
+}
+function openGuide(){
+  endSprint(true); clearTimeout(N.flashT); clearTimeout(N.timer); clearTimeout(C.timer);
+  G.i = 0; renderGuide();
+  $('#guide').hidden = false;
+}
+function closeGuide(){
+  $('#guide').hidden = true;
+  if(S.guide !== GUIDE_VERSION){ S.guide = GUIDE_VERSION; save(); }
+  // la question en cours repart à zéro (chrono, flash)
+  if(R.tab === 'nommer' && N.q && !N.ans) nextN();
+  if(R.tab === 'construire' && C.q && !C.ans) C.t0 = performance.now();
+}
+const guideOpen = () => !$('#guide').hidden;
+function guideStep(d){
+  const n = guidePages().length;
+  if(G.i + d < 0 || G.i + d >= n) return closeGuide();
+  G.i += d; renderGuide();
+}
+
+// ---------- Mode d'emploi ----------
+function manualSections(){
+  return [
+['bref', 'En bref', `
+<p>ÉCARTS sert à reconnaître les intervalles à l’œil, à les connaître par cœur et à les entendre. Quatre onglets : Nommer, Construire, Explorer, Progrès. Les réglages (${ICON.sliders}) décident de ce qui est travaillé.</p>
+<button class="btn" id="manTour">Revoir la visite guidée</button>`],
+['nommer', 'Nommer', `
+<p>On te montre un intervalle, tu dis lequel c’est.</p>
+<dl class="man-dl">
+<dt>Portée, Noms, Oreille</dt><dd>Ce qu’on te montre : les notes sur la portée, leurs noms (pour le par cœur) ou seulement le son. En mode Noms, pas d’intervalles redoublés : les noms ne disent pas l’octave.</dd>
+<dt>Répondre</dt><dd>Touche le chiffre puis la qualité, dans l’ordre que tu veux. Une fois le chiffre choisi, les qualités impossibles sont grisées. Avec le réglage «&nbsp;Chiffre seul&nbsp;», le chiffre suffit. La rangée 9e à 15e n’apparaît que si des redoublés sont sélectionnés.</dd>
+<dt>Après la réponse</dt><dd>En vert : le nom complet, les demi-tons et ton temps. En rouge : la bonne réponse, avec les notes comptées sur la portée et la règle ligne/interligne. «&nbsp;Suivant&nbsp;» passe à la question d’après ; après une bonne réponse, l’appli peut enchaîner toute seule (réglages).</dd>
+<dt>${ICON.play} Écouter</dt><dd>Joue l’intervalle. En mode Oreille : «&nbsp;Réécouter&nbsp;», et «&nbsp;Arpéger&nbsp;» ou «&nbsp;Ensemble&nbsp;» pour l’entendre autrement.</dd>
+<dt>Indice</dt><dd>Compte les notes à ta place (sur la portée, ou en liste de noms) et rappelle la règle ligne/interligne. Une réponse avec indice ne compte pas dans les stats.</dd>
+<dt>Flash</dt><dd>Chaque appui change la durée d’affichage : 1,5 s, 1 s, 0,6 s, 0,3 s, puis arrêt. Les notes disparaissent ensuite, la clé et l’armure restent. Pas d’indice pendant le flash.</dd>
+<dt>Sprint 60 s</dt><dd>Un maximum de bonnes réponses en une minute. Un record est gardé pour chaque mode, type de réponse et durée de flash. «&nbsp;Arrêter&nbsp;» l’interrompt.</dd>
+<dt>À l’oreille</dt><dd>Deux intervalles qui sonnent pareil sont acceptés tous les deux (quarte augmentée et quinte diminuée, par exemple). Le chrono part quand la deuxième note a sonné.</dd>
+</dl>
+<p class="note">Sous les boutons : ta série de bonnes réponses, ta réussite et ton temps moyen depuis l’ouverture.</p>`],
+['construire', 'Construire', `
+<p>On te donne une note et un intervalle, tu trouves l’autre note. Par exemple : «&nbsp;Sixte mineure en dessous de ${noteName({l:2})}&nbsp;».</p>
+<dl class="man-dl">
+<dt>Répondre</dt><dd>Choisis d’abord l’altération (le bécarre est sélectionné d’office), puis touche la note : la réponse part tout de suite. Les doubles altérations n’apparaissent que si le réglage les autorise.</dd>
+<dt>Altération = note réelle</dt><dd>Le bécarre veut dire «&nbsp;note naturelle&nbsp;», même si l’armure dit autre chose.</dd>
+<dt>Portée, Noms</dt><dd>La note de départ est écrite sur la portée ou donnée par son nom.</dd>
+<dt>Correction</dt><dd>La bonne note en vert, ta réponse en rouge («&nbsp;toi&nbsp;»), avec les notes comptées.</dd>
+<dt>Indice</dt><dd>Montre jusqu’où compter et rappelle le nombre de demi-tons (et l’armure). Ne compte pas dans les stats.</dd>
+<dt>${ICON.play} Écouter</dt><dd>Joue la note de départ ; après la réponse, les deux notes.</dd>
+</dl>
+<p class="note">La présentation «&nbsp;Harmonique&nbsp;» est jouée ici comme ascendante.</p>`],
+['explorer', 'Explorer', `
+<p><b>Fiches</b> : la carte d’identité de chaque intervalle.</p>
+<ul class="tips">
+<li>Choisis la note de départ (altération puis note), l’intervalle dans la grille (Simples ou Redoublés), le sens et la clé. L’intervalle se joue à chaque changement.</li>
+<li>La fiche donne les notes, les demi-tons, l’intervalle simple (pour un redoublé), le renversement, la lecture ligne/interligne et des mélodies repères. Le clavier colore les deux notes et les demi-tons entre elles.</li>
+<li><b>Compter</b> affiche les notes intermédiaires numérotées. <b>Mélodique</b> et <b>Ensemble</b> font écouter.</li>
+</ul>
+<p><b>Astuces</b> : lire le chiffre d’un coup d’œil, trouver la qualité, renversements et redoublés, mélodies repères (avec écoute), repères de clés.</p>`],
+['progres', 'Progrès', `
+<ul class="tips">
+<li><b>Records de sprint</b>, par mode.</li>
+<li><b>Par clé</b> : ta réussite en lecture sur portée, clé par clé.</li>
+<li><b>Par intervalle</b> : une colonne par mode (Portée, Noms, Oreille, Construire). Le filtre au-dessus limite le tableau à une clé.</li>
+<li>Dans chaque case : le pourcentage de réussite, le temps moyen des bonnes réponses et le nombre d’essais. Plus c’est vert, mieux c’est maîtrisé.</li>
+<li>Les intervalles et les clés ratés ou lents reviennent plus souvent (réglage «&nbsp;Points faibles&nbsp;»).</li>
+<li><b>Sauvegarde</b> : «&nbsp;Exporter&nbsp;» crée un fichier JSON avec ta progression (stats et records) ; «&nbsp;Importer&nbsp;» remplace la progression actuelle par celle d’un fichier, après confirmation. Les réglages ne sont pas concernés.</li>
+<li><b>Effacer la progression</b> : toucher deux fois. Les réglages sont gardés.</li>
+</ul>`],
+['reglages', 'Réglages', `
+<p>Bouton ${ICON.sliders} en haut à droite. Les changements s’appliquent à la question suivante.</p>
+<dl class="man-dl">
+<dt>Clés</dt><dd>Sol, Fa, Ut 1 à Ut 4 (Ut 3 : alto, Ut 4 : ténor). Plusieurs choix possibles : elles alternent.</dd>
+<dt>Intervalles travaillés</dt><dd>Colonnes = chiffre, lignes = qualité, nombre dans la case = demi-tons. Touche une case pour l’ajouter ou la retirer. Deuxième grille : les redoublés. Les boutons au-dessus font des sélections toutes faites.</dd>
+<dt>Présentation</dt><dd>Ascendant, descendant, harmonique (les deux notes ensemble). Au moins un choix.</dd>
+<dt>Armure</dt><dd>Aucune, jusqu’à 3 ou jusqu’à 7 altérations, tirée au hasard sur portée. Les altérations écrites se lisent par rapport à elle.</dd>
+<dt>Altérations accidentelles</dt><dd>Aucune : rien d’écrit devant les notes. Simples : dièses, bémols, bécarres. Doubles : aussi les doubles dièses et doubles bémols.</dd>
+<dt>Réponse en mode Nommer</dt><dd>Chiffre seul, ou chiffre + qualité.</dd>
+<dt>Son</dt><dd>Piano électrique, ou orgue tenu : un son stable, idéal pour entendre la couleur des intervalles joués ensemble.</dd>
+<dt>Jouer le son…</dt><dd>Dès l’apparition de la question, et/ou après la réponse.</dd>
+<dt>Enchaîner</dt><dd>Passe tout seul à la question suivante après une bonne réponse.</dd>
+<dt>Indice toujours visible</dt><dd>Mode découverte, non compté dans les stats ; sans effet en mode flash.</dd>
+<dt>Points faibles</dt><dd>Fait revenir plus souvent ce qui est raté ou lent.</dd>
+<dt>Noms des notes</dt><dd>Do Ré Mi ou C D E.</dd>
+<dt>Apparence</dt><dd>Auto (suit le mode clair ou sombre de l’appareil), clair ou sombre.</dd>
+</dl>`],
+['clavier', 'Clavier', `
+<p>Sur ordinateur :</p>
+<dl class="man-dl">
+<dt>Nommer</dt><dd>2 à 9 : chiffre · d, m, M, j, a : qualité (dim., min., maj., juste, aug.) · espace : écouter · entrée : suivant · h : indice.</dd>
+<dt>Construire</dt><dd>Espace : écouter · entrée : suivant.</dd>
+<dt>Guide et mode d’emploi</dt><dd>Flèches : pages du guide · Échap : fermer.</dd>
+</dl>`],
+['savoir', 'Bon à savoir', `
+<ul class="tips">
+<li>Réglages et progression restent dans ce navigateur, sur cet appareil. Un autre navigateur, un autre appareil ou la navigation privée repartent de zéro : pour changer d’appareil, exporte puis importe ta progression (Progrès › Sauvegarde).</li>
+<li>Une fois ouverte, l’appli marche sans connexion.</li>
+<li>Sur iPhone, ouvre l’appli depuis un lien : une pièce jointe s’ouvre souvent dans un aperçu où elle ne fonctionne pas.</li>
+<li>Pas de son ? Vérifie le volume et le mode silencieux, puis touche ${ICON.play} Écouter.</li>
+</ul>
+<p class="note man-ver">ÉCARTS · v${APP_VERSION}</p>`],
+  ];
+}
+const manualOpen = () => !$('#manual').hidden;
+function openManual(){
+  endSprint(true); clearTimeout(N.flashT); clearTimeout(N.timer); clearTimeout(C.timer);
+  const secs = manualSections();
+  $('#manToc').innerHTML = secs.map(([id, t]) => `<button data-sec="${id}">${t}</button>`).join('');
+  $('#manBody').innerHTML = secs.map(([id, t, h]) => `<section class="man-sec" id="man-${id}"><h3>${t}</h3>${h}</section>`).join('');
+  $('#manual').hidden = false;
+  $('#manual .sheet-panel').scrollTop = 0;
+}
+function closeManual(){
+  $('#manual').hidden = true;
+  if(R.tab === 'nommer' && N.q && !N.ans) nextN();
+  if(R.tab === 'construire' && C.q && !C.ans) C.t0 = performance.now();
+}
+
+// ---------- Onglets ----------
+function setTab(t){
+  if(R.sprint) endSprint(true);
+  R.tab = t;
+  $$('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+  $$('.view').forEach(v => v.hidden = v.id !== 'v-' + t);
+  if(t === 'nommer' && !N.q) nextN();
+  if(t === 'construire' && !C.q) nextC();
+  if(t === 'explorer') renderE();
+  if(t === 'progres') renderP();
+}
+
+// ---------- Événements ----------
+function init(){
+  applyTheme();
+  if(darkMQ){ const f = () => { if(S.settings.theme === 'auto') applyTheme(); }; darkMQ.addEventListener ? darkMQ.addEventListener('change', f) : darkMQ.addListener(f); }
+  save();
+  $('#logo').innerHTML = `<svg viewBox="0 0 40 32"><path d="M10 21 C 13 9, 22 6, 29 9" fill="none" style="stroke:var(--accent)" stroke-width="1.4" stroke-linecap="round" stroke-dasharray=".1 3"/>`
+    + `<path fill-rule="evenodd" style="fill:var(--ink)" d="${headPath(9, 25, .85)}"/><path fill-rule="evenodd" style="fill:var(--ink)" d="${headPath(30, 9, .85)}"/></svg>`;
+  $('#openSet').innerHTML = ICON.sliders;
+  $('#closeSet').innerHTML = ICON.close;
+  $('#numsN').innerHTML = SIMPLE_NUMS.map(n => `<button class="ab num" data-n="${n}">${numLabel(n)}</button>`).join('');
+  $('#nums2N').innerHTML = COMPOUND_NUMS.map(n => `<button class="ab num" data-n="${n}">${numLabel(n)}</button>`).join('');
+  $('#qualsN').innerHTML = QUALS.map(q => `<button class="ab qual" data-q="${q}">${Q_SHORT[q]}</button>`).join('');
+  $('#clefE').innerHTML = CLEFS.map(([v, l]) => `<button data-v="${v}">${l}</button>`).join('');
+  $('#playE').innerHTML = ICON.play + ' Mélodique';
+  $('#playEh').innerHTML = ICON.play + ' Ensemble';
+  $('#playC').innerHTML = ICON.play + ' Écouter';
+  buildSettings();
+
+  $('#tabs').addEventListener('click', e => { const b = e.target.closest('button'); if(b) setTab(b.dataset.t); });
+  $('#openSet').addEventListener('click', openSheet);
+  $('#closeSet').addEventListener('click', closeSheet);
+  $('#sheet .sheet-bg').addEventListener('click', closeSheet);
+
+  // Nommer
+  $('#stimN').addEventListener('click', e => {
+    const b = e.target.closest('button'); if(!b) return;
+    endSprint(true); S.settings.stimN = b.dataset.v; save(); nextN();
+  });
+  $('#v-nommer .answers').addEventListener('click', e => {
+    const nb = e.target.closest('.num'), qb = e.target.closest('.qual');
+    if(nb) pickNum(+nb.dataset.n);
+    else if(qb && !qb.disabled) pickQual(qb.dataset.q);
+  });
+  $('#playN').addEventListener('click', () => playN());
+  $('#hintN').addEventListener('click', () => {
+    if(!N.q) return;
+    if(S.settings.stimN === 'oreille') return playN(true);
+    if(N.ans || flashOn()) return;
+    N.hint = !N.hint || S.settings.alwaysHint; renderN();
+  });
+  $('#flashN').addEventListener('click', () => {
+    const i = FLASH_STEPS.indexOf(S.settings.flash);
+    S.settings.flash = FLASH_STEPS[(i + 1) % FLASH_STEPS.length]; save();
+    endSprint(true); nextN();
+  });
+  $('#cardN').addEventListener('click', e => { if(e.target.closest('[data-act="play"]')) playN(); });
+  $('#fbN').addEventListener('click', e => { if(e.target.closest('[data-act="next"]')) nextN(); });
+  $('#sprintN').addEventListener('click', () => R.sprint && R.sprint.m === 'N' ? endSprint(true) : startSprint('N'));
+
+  // Construire
+  $('#stimC').addEventListener('click', e => {
+    const b = e.target.closest('button'); if(!b) return;
+    endSprint(true); S.settings.stimC = b.dataset.v; save(); nextC();
+  });
+  $('#accsC').addEventListener('click', e => {
+    const b = e.target.closest('.ac'); if(!b || C.ans) return;
+    C.acc = +b.dataset.a;
+    $$('#accsC .ac').forEach(x => x.classList.toggle('sel', x === b));
+  });
+  $('#letsC').addEventListener('click', e => { const b = e.target.closest('.let'); if(b) submitC(+b.dataset.l); });
+  $('#playC').addEventListener('click', () => { if(!C.q) return; C.ans ? Snd.pair(C.q.root, C.q.target, false) : Snd.one(C.q.root); });
+  $('#hintC').addEventListener('click', () => { if(!C.q || C.ans) return; C.hint = !C.hint || S.settings.alwaysHint; renderC(); });
+  $('#fbC').addEventListener('click', e => { if(e.target.closest('[data-act="next"]')) nextC(); });
+  $('#sprintC').addEventListener('click', () => R.sprint && R.sprint.m === 'C' ? endSprint(true) : startSprint('C'));
+
+  // Explorer
+  $('#accE').addEventListener('click', e => { const b = e.target.closest('.ac'); if(b){ E.a = +b.dataset.a; renderE(); } });
+  $('#letE').addEventListener('click', e => { const b = e.target.closest('.let'); if(b){ E.l = +b.dataset.l; renderE(); Snd.playQ(exQ()); } });
+  $('#gridE').addEventListener('click', e => { const b = e.target.closest('.ivc'); if(b){ E.iv = b.dataset.iv; renderE(); Snd.playQ(exQ()); } });
+  $('#cmpE').addEventListener('click', e => {
+    const b = e.target.closest('button'); if(!b) return;
+    const iv = IVMAP[E.iv], want = b.dataset.v === '1';
+    if(want === iv.n > 8) return;
+    const id = (want ? iv.n + 7 : iv.n - 7) + iv.q;
+    E.iv = IVMAP[id] ? id : (want ? '10M' : '3M');
+    renderE(); Snd.playQ(exQ());
+  });
+  $('#dirE').addEventListener('click', e => { const b = e.target.closest('button'); if(b){ E.dir = b.dataset.v; renderE(); Snd.playQ(exQ()); } });
+  $('#clefE').addEventListener('click', e => { const b = e.target.closest('button'); if(b){ E.clef = b.dataset.v; renderE(); } });
+  $('#playE').addEventListener('click', () => { const q = exQ(); Snd.pair(q.n1, q.n2, false); });
+  $('#playEh').addEventListener('click', () => { const q = exQ(); Snd.pair(q.lo, q.hi, true); });
+  $('#countE').addEventListener('click', () => { E.count = !E.count; renderE(); });
+  $('#viewE').addEventListener('click', e => { const b = e.target.closest('button'); if(b){ E.view = b.dataset.v; renderE(); window.scrollTo(0, 0); } });
+  $('#tipsE').addEventListener('click', e => {
+    const b = e.target.closest('[data-rp]'); if(!b) return;
+    const iv = IVMAP[b.dataset.rp], up = b.dataset.dir === '1';
+    const root = up ? {l:0, a:0, o:4} : {l:0, a:0, o:5}, other = transpose(root, iv, up ? 1 : -1);
+    Snd.pair(root, other, false);
+  });
+
+  // Progrès
+  $('#exportP').addEventListener('click', exportProgress);
+  $('#importP').addEventListener('click', () => { pendingImport = null; ioMsg(''); $('#importFile').value = ''; $('#importFile').click(); });
+  $('#importFile').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if(f) readImport(f); });
+  $('#ioMsg').addEventListener('click', e => {
+    const b = e.target.closest('[data-io]'); if(!b) return;
+    if(b.dataset.io === 'apply' && pendingImport){
+      S.stats = pendingImport.stats; S.records = pendingImport.records; save();
+      N.sess = newSess(); C.sess = newSess();
+      pendingImport = null; renderP();
+      ioMsg('Progression importée.', 'ok');
+    } else { pendingImport = null; ioMsg(''); }
+  });
+  $('#clefP').addEventListener('click', e => { const b = e.target.closest('button'); if(b){ P.clef = b.dataset.v; renderP(); } });
+  $('#resetP').addEventListener('click', e => {
+    const b = e.currentTarget;
+    if(!b.classList.contains('arm')){
+      b.classList.add('arm'); b.textContent = 'Toucher encore pour tout effacer';
+      setTimeout(() => { b.classList.remove('arm'); b.textContent = 'Effacer la progression'; }, 4000);
+      return;
+    }
+    S.stats = {}; S.records = {}; save();
+    N.sess = newSess(); C.sess = newSess();
+    b.classList.remove('arm'); b.textContent = 'Effacer la progression';
+    renderP();
+  });
+
+  // Réglages
+  $('#setBody').addEventListener('click', e => {
+    const st = S.settings;
+    const pr = e.target.closest('[data-preset]');
+    const chip = e.target.closest('.ivc');
+    const segb = e.target.closest('.seg button');
+    const tg = e.target.closest('.tg');
+    if(pr) st.ivs = [...PRESETS[pr.dataset.preset]];
+    else if(chip){
+      const id = chip.dataset.iv;
+      st.ivs = st.ivs.includes(id) ? st.ivs.filter(x => x !== id) : [...st.ivs, id];
+    } else if(segb){
+      const seg = segb.parentElement, k = seg.dataset.k, v = segb.dataset.v;
+      if(seg.dataset.type === 'multi'){
+        const has = st[k].includes(v);
+        if(has && st[k].length === 1) return;
+        st[k] = has ? st[k].filter(x => x !== v) : [...st[k], v];
+      } else st[k] = NUMERIC.includes(k) ? +v : v;
+    } else if(tg) st[tg.dataset.k] = !st[tg.dataset.k];
+    else return;
+    R.dirty = true; save(); syncSettings();
+    if(segb && segb.parentElement.dataset.k === 'theme') applyTheme();
+    if(segb && segb.parentElement.dataset.k === 'timbre') Snd.pair({l:0,a:0,o:4}, {l:2,a:0,o:4}, true);
+  });
+
+  // Clavier (ordinateur)
+  document.addEventListener('keydown', e => {
+    if(e.metaKey || e.ctrlKey || e.altKey) return;
+    if(manualOpen()){ if(e.key === 'Escape') closeManual(); return; }
+    if(guideOpen()){
+      if(e.key === 'Escape') closeGuide();
+      else if(e.key === 'ArrowRight') guideStep(1);
+      else if(e.key === 'ArrowLeft') guideStep(-1);
+      return;
+    }
+    if(!$('#sheet').hidden){ if(e.key === 'Escape') closeSheet(); return; }
+    const k = e.key;
+    if(R.tab === 'nommer'){
+      if(/^[2-9]$/.test(k)) pickNum(+k);
+      else if(k === 'd') pickQual('d');
+      else if(k === 'm') pickQual('m');
+      else if(k === 'M') pickQual('M');
+      else if(k === 'j' || k === 'J') pickQual('J');
+      else if(k === 'a' || k === 'A') pickQual('a');
+      else if(k === ' '){ e.preventDefault(); playN(); }
+      else if(k === 'Enter' && N.ans && !R.sprint){ e.preventDefault(); nextN(); }
+      else if(k === 'h' || k === 'i') $('#hintN').click();
+    } else if(R.tab === 'construire'){
+      if(k === ' '){ e.preventDefault(); $('#playC').click(); }
+      else if(k === 'Enter' && C.ans && !R.sprint){ e.preventDefault(); nextC(); }
+    }
+  });
+
+  // Guide
+  $('#guideClose').innerHTML = ICON.close;
+  $('#openHelp').addEventListener('click', openManual);
+  $('#closeMan').innerHTML = ICON.close;
+  $('#closeMan').addEventListener('click', closeManual);
+  $('#manual .sheet-bg').addEventListener('click', closeManual);
+  $('#manToc').addEventListener('click', e => {
+    const b = e.target.closest('[data-sec]'); if(!b) return;
+    const panel = $('#manual .sheet-panel'), sec = $('#man-' + b.dataset.sec);
+    const gap = sec.getBoundingClientRect().top - $('.man-top').getBoundingClientRect().bottom;
+    panel.scrollTo({top: panel.scrollTop + gap - 2, behavior:'smooth'});
+  });
+  $('#manBody').addEventListener('click', e => { if(e.target.closest('#manTour')){ $('#manual').hidden = true; openGuide(); } });
+  $('#guideClose').addEventListener('click', closeGuide);
+  $('.guide-bg').addEventListener('click', closeGuide);
+  $('#guidePrev').addEventListener('click', () => guideStep(-1));
+  $('#guideNext').addEventListener('click', () => guideStep(1));
+  $('#guideDots').addEventListener('click', e => { const b = e.target.closest('button'); if(b){ G.i = +b.dataset.i; renderGuide(); } });
+
+  setTab('nommer');
+  if((S.guide || 0) < GUIDE_VERSION) openGuide();
+}
+init();
+
+</script>
+</body>
+</html>
